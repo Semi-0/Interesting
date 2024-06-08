@@ -60,18 +60,16 @@ export class MatchConstant implements MatchItem{
 // needs more precise error handler
 
 export function match_eqv(pattern_constant: MatchConstant): (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any) => any {
-    
-    function e_match(data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): any  {
-        if (data.length == 0) {
-            return false
+    return (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): any => {
+        if (data.length === 0) {
+            return false;
         }
         if (data[0] === pattern_constant.name) {
-            return succeed(dictionary, 1)
+            return succeed(dictionary, 1);
         } else {
-            return false
+            return false;
         }
-    }
-    return e_match;
+    };
 }
 
 export class MatchElement implements MatchItem{
@@ -82,22 +80,20 @@ export class MatchElement implements MatchItem{
 }
 
 export function match_element(variable: MatchElement): (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any) => any{
-    function e_match(data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): any {
-        if (data.length == 0) {
-            return false
+    return (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): any => {
+        if (data.length === 0) {
+            return false;
         }
         const binding_value = dictionary.get(variable.name);
         if (binding_value === undefined) {
-            dictionary = dictionary.extend(variable.name, data[0]);
-            return succeed(dictionary, 1)
-        }
-        else if (binding_value === data[0]) {
-            return succeed(dictionary, 1)
+            const extendedDictionary = dictionary.extend(variable.name, data[0]);
+            return succeed(extendedDictionary, 1);
+        } else if (binding_value === data[0]) {
+            return succeed(dictionary, 1);
         } else {
-            return false
+            return false;
         }
-    }
-    return e_match;
+    };
 }
 
 export class MatchSegment implements MatchItem{
@@ -108,47 +104,44 @@ export class MatchSegment implements MatchItem{
 }
 
 
-export function match_segment(variable: MatchSegment) : (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any) => any{
-
-    function loop(index: number, length: number, data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): any{
-        if (index >= length){
-            return false 
+export function match_segment(variable: MatchSegment): (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any) => any {
+    const loop = (index: number, data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): any => {
+        if (index >= data.length) {
+            return false;
         }
-        else{
-            let result = succeed(dictionary.extend(variable.name, data.slice(0, index+1)), index+1)
-            let success = result !== false
-            if (success) {
-                return result 
-            }
-            else{
-                return loop(index+1, length, data, dictionary, succeed)
-            }
-        }
-    }
+        const result = succeed(dictionary.extend(variable.name, data.slice(0, index + 1)), index + 1);
+        return result !== false ? result : loop(index + 1, data, dictionary, succeed);
+    };
 
-
-    function s_match(data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): any{
-        if (data.length == 0) {
-            return false
-        }
-
-        const binding = dictionary.get(variable.name)
-        if (binding === undefined) {
-            return loop(0, data.length, data, dictionary, succeed)
-        }
-        else {
-            return match_segment_equal(data, binding, (i) => succeed(dictionary, i))
-        }
-    }
-
-    function match_segment_equal(data: string[], value: string[], ok: (i: number) => any){
+    const match_segment_equal = (data: string[], value: string[], ok: (i: number) => any): any => {
         for (let i = 0; i < data.length; i++) {
             if (data[i] !== value[i]) {
-                return false
+                return false;
             }
         }
-        return ok(data.length)
-    }
+        return ok(data.length);
+    };
 
-    return s_match
+    return (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): any => {
+        if (data.length === 0) {
+            return false;
+        }
+
+        const binding = dictionary.get(variable.name);
+        if (binding === undefined) {
+            return loop(0, data, dictionary, succeed);
+        } else {
+            return match_segment_equal(data, binding, (i) => succeed(dictionary, i));
+        }
+    };
 }
+
+
+// export function match_list(matchers: MatchItem[]): (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any) => any {
+//     return (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): any => {
+//         if (data.length === 0) {
+//             return false;
+//         }
+//     };
+// }
+
