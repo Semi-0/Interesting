@@ -1,4 +1,4 @@
-import { MatchDict, MatchResult, match_eqv, MatchConstant, match_element, MatchElement, match_segment, MatchSegment } from '../tools/Matcher';
+import { MatchDict, MatchResult, match_eqv, MatchConstant, match_element, MatchElement, match_segment, MatchSegment, match_list } from '../tools/Matcher';
 import {test, expect, describe, beforeEach, mock, jest} from "bun:test";
 
 describe('MatchResult', () => {
@@ -167,5 +167,46 @@ describe('match_segment', () => {
 
         expect(result).toBe(false);
         expect(mockSucceed).not.toHaveBeenCalled();
+    });
+});
+
+describe('match_list with complex patterns', () => {
+    test('should handle patterns with constants and segments', () => {
+        // Matchers for the first scenario
+        const matchX = match_eqv(new MatchConstant("x"));
+        const matchSegment = match_segment(new MatchSegment("segment"));
+        const matchY = match_eqv(new MatchConstant("y"));
+
+        // Create the match_list for the first pattern [match_constant, match_segment]
+        const pattern1 = match_list([matchX, matchSegment]);
+
+        // Create the match_list for the second pattern [match_constant, match_segment, match_constant]
+        const pattern2 = match_list([matchX, matchSegment, matchY]);
+
+        // Define the test data and dictionary
+        const testData1 = ["x", "hello", "world"];
+        const testData2 = ["x", "hello", "world", "y"];
+        const dictionary = new MatchDict(new Map());
+
+        // Define a mock succeed function
+        const mockSucceed = jest.fn((dictionary: MatchDict, nEaten: number) => true);
+
+        // Execute the matchers
+        const result1 = pattern1(testData1, dictionary, mockSucceed);
+        const result2 = pattern2(testData2, dictionary, mockSucceed);
+
+        // Check if the succeed function was called correctly for the first pattern
+        expect(mockSucceed).toHaveBeenCalledWith(expect.any(MatchDict), 3);
+        expect(result1).toBe(true);
+        expect(mockSucceed.mock.calls[0][0].get("segment")).toEqual(["hello", "world"]);
+
+        // Reset mock for the second pattern
+        mockSucceed.mockClear();
+
+        // Check if the succeed function was called correctly for the second pattern
+        const result = pattern2(testData2, dictionary, mockSucceed);
+        expect(mockSucceed).toHaveBeenCalledWith(expect.any(MatchDict), 4);
+        expect(result).toBe(true);
+        expect(mockSucceed.mock.calls[0][0].get("segment")).toEqual(["hello", "world"]);
     });
 });

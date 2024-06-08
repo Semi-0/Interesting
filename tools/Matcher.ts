@@ -56,10 +56,10 @@ export class MatchConstant implements MatchItem{
     }
 }
 
-
+type matcher_callback =  (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any) => any
 // needs more precise error handler
 
-export function match_eqv(pattern_constant: MatchConstant): (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any) => any {
+export function match_eqv(pattern_constant: MatchConstant): matcher_callback {
     return (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): any => {
         if (data.length === 0) {
             return false;
@@ -79,7 +79,7 @@ export class MatchElement implements MatchItem{
     }
 }
 
-export function match_element(variable: MatchElement): (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any) => any{
+export function match_element(variable: MatchElement): matcher_callback {
     return (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): any => {
         if (data.length === 0) {
             return false;
@@ -104,7 +104,7 @@ export class MatchSegment implements MatchItem{
 }
 
 
-export function match_segment(variable: MatchSegment): (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any) => any {
+export function match_segment(variable: MatchSegment): matcher_callback {
     const loop = (index: number, data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): any => {
         if (index >= data.length) {
             return false;
@@ -137,11 +137,29 @@ export function match_segment(variable: MatchSegment): (data: string[], dictiona
 }
 
 
-// export function match_list(matchers: MatchItem[]): (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any) => any {
-//     return (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): any => {
-//         if (data.length === 0) {
-//             return false;
-//         }
-//     };
-// }
+export function match_list(matchers: matcher_callback[]) : matcher_callback {
+    return (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): any => {
+        const loop = (data_index: number, matcher_index: number, dictionary: MatchDict): any => {
+            if (matcher_index < matchers.length){
+                const matcher = matchers[matcher_index] 
+                const result = matcher(data.slice(data_index), dictionary, (new_dict, nEaten) => loop(data_index + nEaten, matcher_index + 1, new_dict))
+                return result
+            } 
+            else if (data_index < data.length){
+               return false  
+            } 
+            else if (data_index >= data.length){
+                return succeed(dictionary, data_index)
+            }
+            else {
+                return false
+            }
+        };
+
+        if (data.length === 0) {
+            return false;
+        }
+        return loop(0, 0, dictionary)
+    };
+}
 
