@@ -79,12 +79,17 @@ export class MatchElement implements MatchItem{
     }
 }
 
-export function match_element(variable: MatchElement): matcher_callback {
+export function match_element(variable: MatchElement, restriction: (value: string) => boolean = (value: string) => true): matcher_callback {
     return (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): any => {
         if (data.length === 0) {
             return false;
         }
         const binding_value = dictionary.get(variable.name);
+        
+        if (!restriction(data[0])){
+            return false
+        }
+
         if (binding_value === undefined) {
             const extendedDictionary = dictionary.extend(variable.name, data[0]);
             return succeed(extendedDictionary, 1);
@@ -185,11 +190,15 @@ export class MatcherBuilder{
         return this.add(match_element(new MatchElement(name)))
     }
 
+    public setElementWithRestriction(name: string, restriction: (value: string) => boolean): MatcherBuilder {
+        return this.add(match_element(new MatchElement(name), restriction))
+    }
+
     public setSegment(name: string): MatcherBuilder {
         return this.add(match_segment(new MatchSegment(name)))
     }
 
-    public match(data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): any {
-        return run_matcher(this.patterns, data, dictionary, succeed)
+    public match(data: string[],  succeed: (dictionary: MatchDict, nEaten: number) => any): any {
+        return run_matcher(this.patterns, data, emptyMatchDict(), succeed)
     }
 }

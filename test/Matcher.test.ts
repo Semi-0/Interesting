@@ -1,4 +1,4 @@
-import { MatchDict, MatchResult, match_eqv, MatchConstant, match_element, MatchElement, match_segment, MatchSegment, match_list } from '../tools/Matcher';
+import { MatchDict, MatchResult, match_eqv, MatchConstant, match_element, MatchElement, match_segment, MatchSegment, match_list, MatcherBuilder, emptyMatchDict } from '../tools/Matcher';
 import {test, expect, describe, beforeEach, mock, jest} from "bun:test";
 
 describe('MatchResult', () => {
@@ -231,6 +231,74 @@ describe('match_list with complex patterns', () => {
 
         // Check if the result is false and succeed function was not called
         expect(result).toBe(false);
+        expect(mockSucceed).not.toHaveBeenCalled();
+    });
+});
+
+describe('MatcherBuilder', () => {
+    test('should correctly configure and run a matcher with constants, elements, and segments', () => {
+        // Create a new MatcherBuilder instance
+        const builder = new MatcherBuilder();
+
+        // Configure the builder with various matchers
+        builder.setConstant("start");
+        builder.setElement("middle");
+        builder.setSegment("end");
+
+        // Mock data and dictionary
+        const testData = ["start", "anything", "end"];
+        const mockSucceed = jest.fn((dictionary, nEaten) => true);
+
+        // Execute the matcher
+        const result = builder.match(testData, mockSucceed);
+
+        // Check if the succeed function was called correctly
+        expect(mockSucceed).toHaveBeenCalled();
+        expect(mockSucceed.mock.calls[0][1]).toBe(3); // nEaten should be 3
+        expect(result).toBe(true);
+    });
+
+    test('should return false for mismatched patterns', () => {
+        // Create a new MatcherBuilder instance
+        const builder = new MatcherBuilder();
+
+        // Configure the builder
+        builder.setConstant("start");
+        builder.setElement("middle");
+        builder.setSegment("end");
+
+        // Mock data and dictionary
+        const mismatchedData = ["wrong", "data", "here"];
+        const mockSucceed = jest.fn((dictionary, nEaten) => true);
+
+        // Execute the matcher
+        const result = builder.match(mismatchedData, mockSucceed);
+
+        // Check if the succeed function was not called due to mismatch
+        expect(mockSucceed).not.toHaveBeenCalled();
+        expect(result).toBe(false);
+    });
+
+    test('should handle element with restriction correctly', () => {
+        // Create a new MatcherBuilder instance
+        const builder = new MatcherBuilder();
+
+        // Configure the builder with an element that has a restriction
+        builder.setElementWithRestriction("number", value => !isNaN(Number(value)));
+
+        // Mock data and dictionary
+        const validData = ["42"];
+        const invalidData = ["not-a-number"];
+        const mockSucceed = jest.fn((dictionary, nEaten) => true);
+
+        // Execute the matcher with valid data
+        builder.match(validData, mockSucceed);
+        expect(mockSucceed).toHaveBeenCalled();
+        expect(mockSucceed.mock.calls[0][1]).toBe(1); // nEaten should be 1
+
+        // Reset mock and test with invalid data
+        mockSucceed.mockClear();
+        builder.match(invalidData, mockSucceed);
         expect(mockSucceed).not.toHaveBeenCalled();
     });
 });
