@@ -209,4 +209,28 @@ describe('match_list with complex patterns', () => {
         expect(result).toBe(true);
         expect(mockSucceed.mock.calls[0][0].get("segment")).toEqual(["hello", "world"]);
     });
+
+    test('should return false for mismatched patterns', () => {
+        // Matchers setup
+        const matchX = match_eqv(new MatchConstant("x"));
+        const matchSegment = match_segment(new MatchSegment("segment"));
+        const matchY = match_eqv(new MatchConstant("y"));
+
+        // Create the match_list for the pattern [match_constant, match_segment, match_constant]
+        const pattern = match_list([matchX, matchSegment, matchY]);
+
+        // Define test data that does not match the pattern
+        const mismatchedData = ["x", "hello", "oops", "z"];  // "z" should be "y"
+        const dictionary = new MatchDict(new Map());
+
+        // Define a mock succeed function
+        const mockSucceed = jest.fn((dictionary: MatchDict, nEaten: number) => true);
+
+        // Execute the matcher
+        const result = pattern(mismatchedData, dictionary, mockSucceed);
+
+        // Check if the result is false and succeed function was not called
+        expect(result).toBe(false);
+        expect(mockSucceed).not.toHaveBeenCalled();
+    });
 });
