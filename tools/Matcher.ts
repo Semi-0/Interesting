@@ -163,3 +163,33 @@ export function match_list(matchers: matcher_callback[]) : matcher_callback {
     };
 }
 
+
+export function run_matcher(matchers: matcher_callback[], data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): any {
+   const ml = match_list(matchers)
+   return ml(data, dictionary, succeed)
+}
+
+export class MatcherBuilder{
+    private patterns: matcher_callback[] = []
+
+    private add(pattern: matcher_callback): MatcherBuilder {
+        this.patterns.push(pattern)
+        return this
+    }
+
+    public setConstant(name: string): MatcherBuilder {
+        return this.add(match_eqv(new MatchConstant(name)))
+    }
+
+    public setElement(name: string): MatcherBuilder {
+        return this.add(match_element(new MatchElement(name)))
+    }
+
+    public setSegment(name: string): MatcherBuilder {
+        return this.add(match_segment(new MatchSegment(name)))
+    }
+
+    public match(data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): any {
+        return run_matcher(this.patterns, data, dictionary, succeed)
+    }
+}
