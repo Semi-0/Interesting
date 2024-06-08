@@ -20,7 +20,7 @@
             (n 0))
         (cond ((pair? value)
             (if (and (pair? data)
-                      (equal? (car data) (cdr value))) 
+                      (equal? (car data) (car value))) 
                       (lp (cdr data) (cdr value) (+ n 1))
                       #f)
             ((null? value) (ok n))

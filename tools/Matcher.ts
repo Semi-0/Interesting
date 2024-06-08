@@ -56,11 +56,48 @@ export class MatchConstant implements MatchItem{
     }
 }
 
+
+// needs more precise error handler
+
+export function match_eqv(pattern_constant: MatchConstant): (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => void | boolean) => void | boolean {
+    
+    function e_match(data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => void | boolean): void | boolean  {
+        if (data.length == 0) {
+            return false
+        }
+        if (data[0] === pattern_constant.name) {
+            succeed(dictionary, 1)
+        } else {
+            return false
+        }
+    }
+    return e_match;
+}
+
 export class MatchElement implements MatchItem{
     public readonly name: string;
     constructor(_name: string) {
         this.name = _name;
     }
+}
+
+export function match_element(variable: MatchElement): (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any) => void | boolean{
+    function e_match(data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): void | boolean {
+        if (data.length == 0) {
+            return false
+        }
+        const binding_value = dictionary.get(variable.name);
+        if (binding_value === undefined) {
+            dictionary = dictionary.extend(variable.name, data[0]);
+            succeed(dictionary, 1)
+        }
+        else if (binding_value === data[0]) {
+            succeed(dictionary, 1)
+        } else {
+            return false
+        }
+    }
+    return e_match;
 }
 
 export class MatchSegment implements MatchItem{
@@ -70,50 +107,32 @@ export class MatchSegment implements MatchItem{
     }
 }
 
-export function match_eqv(pattern_constant: MatchConstant): (data: string[], dictionary: MatchDict) => MatchResult {
-    function e_match(data: string[], dictionary: MatchDict): MatchResult {
+
+export function match_segment(variable: MatchSegment) : (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any) => void | boolean{
+    function s_match(data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): void | boolean{
         if (data.length == 0) {
-            return new MatchResult(false, emptyMatchDict(), 0);
+            return false
         }
-        if (data[0] === pattern_constant.name) {
-            return new MatchResult(true, dictionary, 1);
-        } else {
-            return new MatchResult(false, emptyMatchDict(), 0);
+
+        const binding = dictionary.get(variable.name)
+        if (binding === undefined) {
+            for (let i = 0; i < data.length; i++) {
+                succeed(dictionary.extend(variable.name, data.slice(0, i+1)), i+1)
+            }
+        }
+        else {
+            return match_segment_equal(data, binding, (i) => succeed(dictionary, i))
         }
     }
-    return e_match;
-}
 
-// function x_matcher(data: string[], dictionary: MatchDict): MatchResult {
-//     return match_eqv(new MatchConstant("x"))(data, dictionary);
-// }
-
-// console.log(x_matcher(["x"], new MatchDict(new Map())))
-// console.log(x_matcher(["y", "x"], new MatchDict(new Map())))
-
-export function match_element(variable: MatchElement): (data: string[], dictionary: MatchDict) => MatchResult {
-    function e_match(data: string[], dictionary: MatchDict): MatchResult {
-        if (data.length == 0) {
-            return new MatchResult(false, emptyMatchDict(), 0);
+    function match_segment_equal(data: string[], value: string[], ok: (i: number) => void | boolean){
+        for (let i = 0; i < data.length; i++) {
+            if (data[i] !== value[i]) {
+                return false
+            }
         }
-        const binding_value = dictionary.get(variable.name);
-        if (binding_value === undefined) {
-            dictionary = dictionary.extend(variable.name, data[0]);
-            return new MatchResult(true, dictionary, 1);
-        }
-        else if (binding_value === data[0]) {
-            return new MatchResult(true, dictionary, 1);
-        } else {
-            return new MatchResult(false, emptyMatchDict(), 0);
-        }
+        ok(data.length)
     }
-    return e_match;
+
+    return s_match
 }
-
-
-
-
-// console.log(match_element(new MatchElement("x"))(["a"], new MatchDict(new Map())))
-
-// console.log(match_element(new MatchElement("x"))(["b", "a"], new MatchDict(new Map())))
-

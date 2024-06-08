@@ -1,5 +1,6 @@
-import { MatchDict, MatchResult, match_eqv, MatchConstant, match_element, MatchElement } from '../tools/Matcher';
-import {test, expect, describe, beforeEach} from "bun:test";
+import { MatchDict, MatchResult, match_eqv, MatchConstant, match_element, MatchElement, match_segment, MatchSegment } from '../tools/Matcher';
+import {test, expect, describe, beforeEach, mock, jest} from "bun:test";
+
 describe('MatchResult', () => {
     let dictionary: MatchDict;
     let matchResult: MatchResult;
@@ -45,39 +46,123 @@ describe('MatchResult', () => {
     });
 });
 
-test('x_matcher matches correctly', () => {
-    const x_matcher = (data: string[], dictionary: MatchDict): MatchResult => {
-        return match_eqv(new MatchConstant("x"))(data, dictionary);
-    };
+describe('match_eqv', () => {
+    test('should call succeed with correct parameters when match is found', () => {
+        const pattern_constant = new MatchConstant("x");
+        const matcher = match_eqv(pattern_constant);
+        const mockData = ["x"];
+        const mockDictionary = new MatchDict(new Map());
+        const mockSucceed = mock();
 
-    // Test case where the input matches the pattern "x"
-    let result = x_matcher(["x"], new MatchDict(new Map()));
-    expect(result.success).toBe(true);
-    expect(result.nEaten).toBe(1);
+        matcher(mockData, mockDictionary, mockSucceed);
 
-    // Test case where the input does not match the pattern "x"
-    result = x_matcher(["y", "x"], new MatchDict(new Map()));
-    expect(result.success).toBe(false);
-    expect(result.nEaten).toBe(0);
+        expect(mockSucceed).toHaveBeenCalledWith(mockDictionary, 1);
+    });
+
+    test('should return false when no data is provided', () => {
+        const pattern_constant = new MatchConstant("x");
+        const matcher = match_eqv(pattern_constant);
+        const mockData : string[] = [];
+        const mockDictionary = new MatchDict(new Map());
+        const mockSucceed = mock();
+
+        const result = matcher(mockData, mockDictionary, mockSucceed);
+
+        expect(result).toBe(false);
+        expect(mockSucceed).not.toHaveBeenCalled();
+    });
+
+    test('should return false when the first element does not match', () => {
+        const pattern_constant = new MatchConstant("x");
+        const matcher = match_eqv(pattern_constant);
+        const mockData = ["y"];
+        const mockDictionary = new MatchDict(new Map());
+        const mockSucceed = mock();
+
+        const result = matcher(mockData, mockDictionary, mockSucceed);
+
+        expect(result).toBe(false);
+        expect(mockSucceed).not.toHaveBeenCalled();
+    });
 });
 
-test('match_element handles variable binding and matching correctly', () => {
-    const elementMatcher = match_element(new MatchElement("x"));
+describe('match_element', () => {
+    test('should handle variable binding correctly when unbound', () => {
+        const element = new MatchElement("x");
+        const matcher = match_element(element);
+        const mockData = ["a"];
+        const mockDictionary = new MatchDict(new Map());
+        const mockSucceed = jest.fn();
 
-    // Test case where "x" is bound to "a"
-    let result = elementMatcher(["a"], new MatchDict(new Map()));
-    expect(result.success).toBe(true);
-    expect(result.nEaten).toBe(1);
-    expect(result.dictionary.get("x")).toBe("a");
+        matcher(mockData, mockDictionary, mockSucceed);
 
-    // Test case where "x" is already bound to "a", and input is "b"
-    let preBoundDict = new MatchDict(new Map([["x", "a"]]));
-    result = elementMatcher(["b"], preBoundDict);
-    expect(result.success).toBe(false);
-    expect(result.nEaten).toBe(0);
+        expect(mockSucceed).toHaveBeenCalledWith(expect.any(MatchDict), 1);
+        expect(mockSucceed.mock.calls[0][0].get("x")).toBe("a");
+    });
 
-    // Test case where "x" is already bound to "a", and input is "a"
-    result = elementMatcher(["a"], preBoundDict);
-    expect(result.success).toBe(true);
-    expect(result.nEaten).toBe(1);
+    test('should handle variable binding correctly when already bound to the same value', () => {
+        const element = new MatchElement("x");
+        const matcher = match_element(element);
+        const mockData = ["a"];
+        const mockDictionary = new MatchDict(new Map([["x", "a"]]));
+        const mockSucceed = jest.fn();
+
+        matcher(mockData, mockDictionary, mockSucceed);
+
+        expect(mockSucceed).toHaveBeenCalledWith(mockDictionary, 1);
+    });
+
+    test('should return false when already bound to a different value', () => {
+        const element = new MatchElement("x");
+        const matcher = match_element(element);
+        const mockData = ["b"];
+        const mockDictionary = new MatchDict(new Map([["x", "a"]]));
+        const mockSucceed = jest.fn();
+
+        const result = matcher(mockData, mockDictionary, mockSucceed);
+
+        expect(result).toBe(false);
+        expect(mockSucceed).not.toHaveBeenCalled();
+    });
+});
+
+describe('match_segment', () => {
+    test('should handle segment matching correctly when unbound', () => {
+        const segment = new MatchSegment("segment");
+        const matcher = match_segment(segment);
+        const mockData = ["hello", "world"];
+        const mockDictionary = new MatchDict(new Map());
+        const mockSucceed = jest.fn();
+
+        matcher(mockData, mockDictionary, mockSucceed);
+
+        expect(mockSucceed).toHaveBeenCalledTimes(2);
+        expect(mockSucceed.mock.calls[1][0].get("segment")).toEqual(["hello", "world"]);
+        expect(mockSucceed.mock.calls[1][1]).toBe(2); 
+    });
+
+    test('should handle segment matching correctly when already bound to the same value', () => {
+        const segment = new MatchSegment("segment");
+        const matcher = match_segment(segment);
+        const mockData = ["hello", "world"];
+        const mockDictionary = new MatchDict(new Map([["segment", ["hello", "world"]]]));
+        const mockSucceed = jest.fn();
+
+        matcher(mockData, mockDictionary, mockSucceed);
+
+        expect(mockSucceed).toHaveBeenCalledWith(mockDictionary, 2);
+    });
+
+    test('should return false when already bound to a different value', () => {
+        const segment = new MatchSegment("segment");
+        const matcher = match_segment(segment);
+        const mockData = ["different", "input"];
+        const mockDictionary = new MatchDict(new Map([["segment", ["hello", "world"]]]));
+        const mockSucceed = jest.fn();
+
+        const result = matcher(mockData, mockDictionary, mockSucceed);
+
+        expect(result).toBe(false);
+        expect(mockSucceed).not.toHaveBeenCalled();
+    });
 });
