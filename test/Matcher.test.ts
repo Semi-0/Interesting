@@ -132,13 +132,16 @@ describe('match_segment', () => {
         const matcher = match_segment(segment);
         const mockData = ["hello", "world"];
         const mockDictionary = new MatchDict(new Map());
-        const mockSucceed = jest.fn();
+        const mockSucceed = jest.fn((result: any) => {
+            console.log(result)
+            return false
+        });
 
         matcher(mockData, mockDictionary, mockSucceed);
 
         expect(mockSucceed).toHaveBeenCalledTimes(2);
         expect(mockSucceed.mock.calls[1][0].get("segment")).toEqual(["hello", "world"]);
-        expect(mockSucceed.mock.calls[1][1]).toBe(2); 
+        expect(mockSucceed).toHaveBeenCalledWith(expect.any(MatchDict), 2);
     });
 
     test('should handle segment matching correctly when already bound to the same value', () => {

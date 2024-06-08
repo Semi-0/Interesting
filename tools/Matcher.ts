@@ -59,14 +59,14 @@ export class MatchConstant implements MatchItem{
 
 // needs more precise error handler
 
-export function match_eqv(pattern_constant: MatchConstant): (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => void | boolean) => void | boolean {
+export function match_eqv(pattern_constant: MatchConstant): (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any) => any {
     
-    function e_match(data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => void | boolean): void | boolean  {
+    function e_match(data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): any  {
         if (data.length == 0) {
             return false
         }
         if (data[0] === pattern_constant.name) {
-            succeed(dictionary, 1)
+            return succeed(dictionary, 1)
         } else {
             return false
         }
@@ -81,18 +81,18 @@ export class MatchElement implements MatchItem{
     }
 }
 
-export function match_element(variable: MatchElement): (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any) => void | boolean{
-    function e_match(data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): void | boolean {
+export function match_element(variable: MatchElement): (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any) => any{
+    function e_match(data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): any {
         if (data.length == 0) {
             return false
         }
         const binding_value = dictionary.get(variable.name);
         if (binding_value === undefined) {
             dictionary = dictionary.extend(variable.name, data[0]);
-            succeed(dictionary, 1)
+            return succeed(dictionary, 1)
         }
         else if (binding_value === data[0]) {
-            succeed(dictionary, 1)
+            return succeed(dictionary, 1)
         } else {
             return false
         }
@@ -108,30 +108,46 @@ export class MatchSegment implements MatchItem{
 }
 
 
-export function match_segment(variable: MatchSegment) : (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any) => void | boolean{
-    function s_match(data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): void | boolean{
+export function match_segment(variable: MatchSegment) : (data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any) => any{
+
+    function loop(index: number, length: number, data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): any{
+        if (index >= length){
+            return false 
+        }
+        else{
+            let result = succeed(dictionary.extend(variable.name, data.slice(0, index+1)), index+1)
+            let success = result !== false
+            if (success) {
+                return result 
+            }
+            else{
+                return loop(index+1, length, data, dictionary, succeed)
+            }
+        }
+    }
+
+
+    function s_match(data: string[], dictionary: MatchDict, succeed: (dictionary: MatchDict, nEaten: number) => any): any{
         if (data.length == 0) {
             return false
         }
 
         const binding = dictionary.get(variable.name)
         if (binding === undefined) {
-            for (let i = 0; i < data.length; i++) {
-                succeed(dictionary.extend(variable.name, data.slice(0, i+1)), i+1)
-            }
+            return loop(0, data.length, data, dictionary, succeed)
         }
         else {
             return match_segment_equal(data, binding, (i) => succeed(dictionary, i))
         }
     }
 
-    function match_segment_equal(data: string[], value: string[], ok: (i: number) => void | boolean){
+    function match_segment_equal(data: string[], value: string[], ok: (i: number) => any){
         for (let i = 0; i < data.length; i++) {
             if (data[i] !== value[i]) {
                 return false
             }
         }
-        ok(data.length)
+        return ok(data.length)
     }
 
     return s_match
