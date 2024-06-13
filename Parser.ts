@@ -12,12 +12,7 @@ const parseString = seq(m =>{
         noneOf("\"")
     ));
     m(char('"'));
-    if (x == undefined){
-        return x
-    }
-    else{
-        return new LString(x.join(""))
-    }
+    return x == undefined ? x : new LString(x.join(""))
 })
 
 const parseBoolean = seq(m => {
@@ -35,12 +30,7 @@ const parseAtom = seq(m =>{
     symbol,
     digit
    ])))
-   if (all == undefined){
-    return all
-   }
-   else{
-    return new LSymbol(all.join(""))
-   }
+   return all == undefined ? all : new LSymbol(all.join(""))
 })
 
 const parseNumber : Parser<LispElement> = fmap(x => new LNumber(Number(x.join(""))), many1(digit))
