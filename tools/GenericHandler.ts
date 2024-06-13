@@ -32,8 +32,6 @@ export class generic_procedure{
     }
 }
 
-
-
 function make_generic_metadata( arity: Int, handler: (args: any[]) => any): generic_procedure_metadata{
     const metaData : generic_procedure_metadata = {
         arity: arity,
@@ -43,14 +41,11 @@ function make_generic_metadata( arity: Int, handler: (args: any[]) => any): gene
     return metaData
 }
 
-
 export interface generic_procedure_metadata{
     arity: Int
     metaData: {predicate: (...args: any) => boolean, handler: (...args: any) => any}[]
     default_handler: (...args: any) => any
 }
-
-
 
 export interface generic_procedure_handler{
     generic_procedure: generic_procedure

@@ -61,6 +61,7 @@ const parseList : Parser<LispElement> = seq(m => {
 
 const parseExpr: Parser<LispElement> = choice([
     parseAtom,
+    parseBoolean,
     parseNumber,
     parseString,
     parseQuoted,
