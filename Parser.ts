@@ -1,10 +1,10 @@
-import { Parser, charCode, oneOf, skipMany1, space, seq, char, many, noneOf, parse, State, choice, letter, digit, fmap, many1, sepBy } from "parse-combinator"
+import { Parser, charCode, oneOf, skipMany1,  seq, char, many, noneOf, parse, State, choice, letter, digit, fmap, many1, sepBy } from "parse-combinator"
 import  { LString, LNumber, LSymbol, LBoolean, type LispElement, List } from "./definition/LispElement"
 import * as util from 'util';
 
 const symbol = oneOf("!#$%&|*+-/:<=>?@^_~\"")
-const full_space = oneOf("\t\r\n ")
-const spaces = skipMany1(full_space)
+const space = oneOf("\t\r\n ")
+const spaces = skipMany1(space)
 
 const parseString = seq(m =>{
     m(char('"'));
