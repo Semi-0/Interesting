@@ -6,30 +6,31 @@ type Int = Static<typeof Integer>;
 
 
 export class generic_procedure{
-    default_handler: (args: any[]) => any
+    default_handler: (...args: any) => any
     metaData: generic_procedure_metadata
-    constructor(arity: Int, default_handler: (args: any[]) => any){
+    constructor(arity: Int, default_handler: (...args: any) => any){
         this.metaData = make_generic_metadata(arity, default_handler)
         this.default_handler = default_handler
     }
-    private dispatch(args: any[]){
+    private dispatch(...args: any){
         const matched_metadata = this.metaData.metaData.find(rule => rule.predicate(args))
         if(matched_metadata === undefined){
             throw new Error("Generic handler failed")
         }
-    return matched_metadata.handler(args)
+    return matched_metadata.handler(...args)
     }
 
-    public define_handler(predicate: (args: any[]) => boolean, handler: (args: any[]) => any){
+    public define_handler(predicate: (...args: any) => boolean, handler: (...args: any) => any){
         this.metaData.metaData.unshift({predicate, handler})
     }
 
-    public execute(args: any[]){
-        return this.dispatch(args)
+    public execute(...args: any){
+        if (args.length !== this.metaData.arity){
+            throw new Error(`Generic handler failed, arity mismatch: ${args.length} !== ${this.metaData.arity}`)
+        }
+        return this.dispatch(...args)
     }
 }
-
-
 
 
 
@@ -45,8 +46,8 @@ function make_generic_metadata( arity: Int, handler: (args: any[]) => any): gene
 
 export interface generic_procedure_metadata{
     arity: Int
-    metaData: {predicate: (args: string[]) => boolean, handler: (args: string[]) => any}[]
-    default_handler: (args: any[]) => any
+    metaData: {predicate: (...args: any) => boolean, handler: (...args: any) => any}[]
+    default_handler: (...args: any) => any
 }
 
 
@@ -54,5 +55,5 @@ export interface generic_procedure_metadata{
 export interface generic_procedure_handler{
     generic_procedure: generic_procedure
     applicability: (args: string[]) => boolean
-    handler: (args: any[]) => any
+    handler: (...args: any) => any
 }
