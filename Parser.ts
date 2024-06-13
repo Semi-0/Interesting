@@ -70,5 +70,5 @@ const parseExpr: Parser<LispElement> = choice([
 
 
 
-const test = parse(parseExpr, new State("(lambda (x) (+ 1 2))"))
-console.log(util.inspect(test, {showHidden: true, depth: 8}))
+// const test = parse(parseExpr, new State("(lambda (x) (+ 1 2))"))
+// console.log(util.inspect(test, {showHidden: true, depth: 8}))
