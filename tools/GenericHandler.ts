@@ -13,11 +13,11 @@ export class generic_procedure{
         this.default_handler = default_handler
     }
     private dispatch(args: any[]){
-        const matched_metadata = this.metaData.metaData.filter(rule => rule.predicate(args))
-        if(matched_metadata.length === 0){
+        const matched_metadata = this.metaData.metaData.find(rule => rule.predicate(args))
+        if(matched_metadata === undefined){
             throw new Error("Generic handler failed")
-    }
-    return matched_metadata[0].handler(args)
+        }
+    return matched_metadata.handler(args)
     }
 
     public define_handler(predicate: (args: any[]) => boolean, handler: (args: any[]) => any){
