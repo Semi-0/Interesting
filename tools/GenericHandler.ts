@@ -13,7 +13,8 @@ export class generic_procedure{
         this.default_handler = default_handler
     }
     private dispatch(...args: any){
-        const matched_metadata = this.metaData.metaData.find(rule => rule.predicate(args))
+        const matched_metadata = this.metaData.metaData.find(rule => rule.predicate(...args))
+        console.log("matched_metadata", matched_metadata)
         if(matched_metadata === undefined){
             throw new Error("Generic handler failed")
         }
@@ -49,6 +50,7 @@ export interface generic_procedure_metadata{
 
 export interface generic_procedure_handler{
     generic_procedure: generic_procedure
-    applicability: (args: string[]) => boolean
+    applicability: (...args: string[]) => boolean
     handler: (...args: any) => any
 }
+
