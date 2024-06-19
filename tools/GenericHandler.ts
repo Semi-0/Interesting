@@ -1,52 +1,95 @@
-import { Number, type Static } from 'runtypes';
+// import { Number, type Static } from 'runtypes';
 
-const Integer = Number.withConstraint(n => n % 1 === 0, { name: 'Integer' });
 
-type Int = Static<typeof Integer>;
 
-export class generic_procedure{
-    default_handler: (...args: any) => any
-    metaData: generic_procedure_metadata
-    constructor(arity: Int, default_handler: (...args: any) => any){
-        this.metaData = make_generic_metadata(arity, default_handler)
-        this.default_handler = default_handler
-    }
 
-    private dispatch(...args: any): any{
-        const matched_metadata = this.metaData.metaData.find(rule => rule.predicate(...args))
-        if(matched_metadata === undefined){
-            throw new Error("Generic handler failed")
-        }
-        return matched_metadata.handler(...args)
-    }
+// export class GenericProcedureStore{
+//     private metaDatas: Map<(...args: any) => any, GenericProcedureMetadata>
+//     constructor(){
+//         this.metaDatas = new Map()
+//     }
 
-    public add_handler(predicate: (...args: any) => boolean, handler: (...args: any) => any){
-        this.metaData.metaData.unshift({predicate, handler})
-    }
+//     public add_metadata(procedure: (...args: any) => any, metaData: GenericProcedureMetadata){
+//         this.metaDatas.set(procedure, metaData)
+//     }
 
-    public makeFunc(): (...args: any) => any{
-        return this.dispatch.bind(this)
-    }
-}
+//     public find_metadata(procedure: (...args: any) => any): GenericProcedureMetadata | undefined{
+//         return this.metaDatas.get(procedure)
+//     }
 
-function make_generic_metadata( arity: Int, handler: (args: any[]) => any): generic_procedure_metadata{
-    const metaData : generic_procedure_metadata = {
-        arity: arity,
-        metaData: [{predicate: () => true, handler: handler}],
-        default_handler: handler
-    }
-    return metaData
-}
+//     public get_length(): Int{
+//         return this.metaDatas.size
+//     }
+// }
 
-export interface generic_procedure_metadata{
-    arity: Int
-    metaData: {predicate: (...args: any) => boolean, handler: (...args: any) => any}[]
-    default_handler: (...args: any) => any
-}
+// // export type GenericProcedureStore = GenericProcedureMetadata[]
 
-export interface generic_procedure_handler{
-    generic_procedure: generic_procedure
-    applicability: (...args: string[]) => boolean
-    handler: (...args: any) => any
-}
+// const generic_procedure_store : GenericProcedureStore = new GenericProcedureStore()
 
+
+
+
+// export function define_generic_procedure_handler(procedure: (...args: any) => any, predicate: (...args: any) => boolean, handler: (...args: any) => any){
+//     const metaData = generic_procedure_store.find_metadata(procedure)
+//     if(metaData === undefined){
+//         throw new Error("Generic handler failed")
+//     }
+//     add_handler(metaData, predicate, handler)
+// }
+
+
+// export function add_handler(metaData: GenericProcedureMetadata, predicate: (...args: any) => boolean, handler: (...args: any) => any){
+//     metaData.addHandler(predicate, handler);
+// }
+
+// export function simple_generic_procedure(name: string, arity: Int, handler: (...args: any) => any): (...args: any) => any {
+//     return construct_generic_procedure(generic_procedure_store)(name, arity, handler)
+// }
+
+// export function construct_generic_procedure(generic_procedure_store: GenericProcedureStore): (name: string, arity: Int, handler: (args: any[]) => any) => (...args: any) => any {
+//    const constructor = (name: string, arity: Int, handler: (args: any[]) => any) => {
+//         const metaData = make_generic_metadata(name, arity, handler)
+//         const the_generic_procedure = (...args: any) : any => {
+//             return generic_procedure_dispatch(metaData, ...args)
+//         }
+//         generic_procedure_store.add_metadata(the_generic_procedure, metaData)
+//         return the_generic_procedure
+//    }
+
+//    return constructor
+// }
+
+// function generic_procedure_dispatch(metaData: GenericProcedureMetadata, ...args: any): any{
+
+
+//     if(metaData === undefined){
+//         throw new Error("Generic handler failed")
+//     }
+//     const matched_metadata = metaData.metaData.find(rule => rule.predicate(...args))
+//     if(matched_metadata === undefined){
+//         return metaData.defaultHandler(...args)
+//     }
+//     return matched_metadata.handler(...args)
+// }
+
+// function make_generic_metadata(name: string, arity: Int, handler: (...args: any) => any): GenericProcedureMetadata{
+//     const metaData : GenericProcedureMetadata =  new GenericProcedureMetadata(
+//         name,
+//         arity,
+//         [],
+//         handler
+//     )
+//     return metaData
+// }
+
+
+// // function testing(arg: Int){
+// //     const generic_procedure = simple_generic_procedure("testing", 1, (...args: any) => "default response")
+// //     return generic_procedure(arg)
+// // }
+// const testing = simple_generic_procedure("testing", 1, (...args: any) => "default response")
+
+// define_generic_procedure_handler(testing, 
+//             (args: any) => {console.log(args); 
+//                             return args === 42}, 
+//             (...args: any) => "specific response")
