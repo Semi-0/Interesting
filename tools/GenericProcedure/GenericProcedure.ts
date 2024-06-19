@@ -1,4 +1,4 @@
-import { set_metaData, get_metaData, get_store } from "./GenericStore";
+import { set_metaData, get_metaData, get_default_store } from "./GenericStore";
 import { GenericProcedureMetadata } from "./GenericProcedureMetadata";
 import type { Int } from "./types";
 
@@ -36,7 +36,7 @@ export function construct_generic_procedure(generic_procedure_store: Map<(...arg
     return constructor
 }
 
-export function simple_generic_procedure(name: string, arity: Int, defaultHandler: (...args: any) => any){
-    const generic_procedure_store = get_store()
+export function construct_simple_generic_procedure(name: string, arity: Int, defaultHandler: (...args: any) => any){
+    const generic_procedure_store = get_default_store()
     return construct_generic_procedure(generic_procedure_store)(name, arity, defaultHandler)
 }

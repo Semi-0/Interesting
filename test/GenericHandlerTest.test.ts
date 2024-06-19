@@ -1,10 +1,10 @@
-import { simple_generic_procedure, define_generic_procedure_handler } from '../tools/GenericProcedure/GenericProcedure';
+import { construct_simple_generic_procedure, define_generic_procedure_handler } from '../tools/GenericProcedure/GenericProcedure';
 
 describe('generic_procedure', () => {
  
     const defaultHandler = jest.fn(args => "default response");
 
-    const testFunc = simple_generic_procedure("testFunc", 1, defaultHandler);
+    const testFunc = construct_simple_generic_procedure("testFunc", 1, defaultHandler);
     
     beforeEach(() => {
         jest.clearAllMocks();  // Clear mocks before each test
@@ -29,7 +29,7 @@ describe('generic_procedure', () => {
 
     // Testing multiple functions
     test('should handle multiple functions with different predicates', () => {
-        const anotherFunc = simple_generic_procedure("anotherFunc", 1, defaultHandler);
+        const anotherFunc = construct_simple_generic_procedure("anotherFunc", 1, defaultHandler);
         const specificHandler1 = jest.fn((...args) => "response from handler 1");
         const specificHandler2 = jest.fn((...args) => "response from handler 2");
 
