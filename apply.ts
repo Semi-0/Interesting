@@ -57,6 +57,7 @@ define_generic_procedure_handler(apply,
         is_environment
     ),
     (procedure: Closure, operands: List, env: Environment) => {
+        console.log("apply_compound_procedure", procedure, operands, env)
         return apply_compound_procedure(procedure, operands, env)
     }
 )
@@ -70,6 +71,7 @@ function apply_compound_procedure(procedure: Closure, operands: List, env: Envir
         throw Error("wrong number of arguments")
     }
 
+    
     let new_env = env.extends_list(procedure.parameters, eval_operands(operands, env))
     return evaluate(procedure.body, new_env)
 }

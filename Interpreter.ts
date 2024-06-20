@@ -1,13 +1,14 @@
 import { define_generic_procedure_handler, construct_simple_generic_procedure } from "./tools/GenericProcedure/GenericProcedure"; 
 
-import type { LispElement } from "./definition/LispElement";
-import { LBoolean, LNumber, LString, List, LSymbol, unwrapAtom } from "./definition/LispElement"
+import type { LispElement, Atom } from "./definition/LispElement";
+import { LBoolean, LNumber, LString, List, LSymbol, unwrapAtom, isAtom } from "./definition/LispElement"
 import { pipe } from "effect";
 import { match_args } from "./tools/GenericProcedure/Predicates";
 import type { Env } from "bun";
 import { Environment, is_environment } from "./definition/Environment";
 import { apply } from "./Apply";
 import { Closure } from "./definition/Closure";
+import { inspect } from "util";
 
 export const advance = construct_simple_generic_procedure("advance", 1, 
     (expr: LispElement) => {
@@ -19,9 +20,9 @@ export const evaluate = construct_simple_generic_procedure("evaluate",
     2, default_eval
 )
 
-function default_eval(expression: LispElement, env: Environment){
+function default_eval(expression: LispElement, env: Environment): LispElement{
     const isApplication = (expr: LispElement): boolean => {
-        return expr instanceof List && expr.length() > 2
+        return expr instanceof List && expr.length() >= 2
     }
 
     const operator = (expr: LispElement): LispElement => {
@@ -35,13 +36,14 @@ function default_eval(expression: LispElement, env: Environment){
     }
 
     if (isApplication(expression)){
-        apply(
+
+        return apply(
             advance(evaluate(operator(expression), env)),
             operands(expression) as List,
             env)
     }
     else{
-       throw Error("unknown expression type" + expression.toString() ) 
+       throw Error("unknown expression type" + inspect(expression, { showHidden: true, depth: 5})) 
     }
 }
 
@@ -60,6 +62,22 @@ function is_self_evaluating(expr: LispElement): boolean{
     return expr instanceof LNumber || expr instanceof LString || expr instanceof LBoolean 
 }
 
+define_generic_procedure_handler(evaluate,
+    match_args(is_variable, is_environment),
+    (expr, env) => {
+        const v = env.lookup(unwrapAtom(expr) as string)
+        if (v !== undefined){
+            return v
+        }
+        else{
+            throw Error("unbound variable: " + expr.toString())
+        }
+    }
+)
+
+function is_variable(expr: LispElement): boolean{
+    return expr instanceof LSymbol
+}
 
 
 define_generic_procedure_handler(evaluate,
@@ -73,8 +91,13 @@ define_generic_procedure_handler(evaluate,
 )
 
 function is_tagged_list(expr: LispElement, tag: string): boolean{
-    const list = expr as List 
-    return list.length() > 0 && unwrapAtom(list.get_element(0)) === tag
+    if (!(expr instanceof List)) return false;
+    const l = expr as List;
+
+    const a = l.get_element(0);
+    if (!(a instanceof LSymbol)) return false;
+
+    return (a as LSymbol).value === tag;
 }
 
 function is_quoted(expr: LispElement): boolean{
@@ -85,7 +108,9 @@ function is_quoted(expr: LispElement): boolean{
 define_generic_procedure_handler(evaluate,
     match_args(is_if, is_environment),
     (expr, env) => {
-        if (advance(evaluate(if_predicate(expr), env))) {
+        const result: LBoolean = advance(evaluate(if_predicate(expr), env))
+ 
+        if (result.isTrue()) {
             return evaluate(if_consequent(expr), env)
         }
         else{
@@ -132,6 +157,7 @@ function make_if(predicate: LispElement, consequent: LispElement, alternative: L
 define_generic_procedure_handler(evaluate,
     match_args(is_lambda, is_environment),
     (expr, env) => {
+
         const parameters = lambda_parameters(expr) as List
         const body = lambda_body(expr)
 
@@ -184,15 +210,23 @@ const flatten_begin = (expr: LispElement): LispElement => {
 
 
 function sequence_to_begin(seq: LispElement): LispElement{
-    if (seq instanceof List && (seq as List).length() > 0){
-        return (seq as List)
+    if (seq instanceof List){
+        if ((seq as List).length() == 0){
+            return (seq as List)
+        }
+        else if ((seq as List).length() == 1){
+            return (seq as List).get_element(0)
+        }
+        else{
+            const seq_list = seq as List
+            return make_begin(seq_list.map(flatten_begin))
+        }
     }
-    else if (seq instanceof List && (seq as List).length() == 1){
-        return (seq as List).get_element(0)
+    else if (isAtom(seq)){
+        return seq
     }
     else{
-        const seq_list = seq as List 
-        return make_begin(seq_list.map(flatten_begin))
+        throw Error("sequence_to_begin: expected a list or atom, got: " + seq.toString())
     }
 }
 
@@ -286,7 +320,7 @@ function let_bound_variables(let_expr: LispElement): List{
 
 function let_bound_values(let_expr: LispElement): List{
     if (let_expr instanceof List && (let_expr as List).length() == 3){
-        const let_exprs = (let_expr as List).get_element(2) as List 
+        const let_exprs = (let_expr as List).get_element(1) as List 
         return let_exprs.map((expr: LispElement) => {
             return (expr as List).get_element(1)
         })
@@ -404,10 +438,10 @@ function has_variable(expr: LispElement): boolean{
 function definition_variable(expr: LispElement): string{
     const l = (expr as List).get_element(1)
     if (has_variable(l)){
-        return (l as List).get_element(0).toString()
+        return unwrapAtom((l as List).get_element(0)) as string
     }
     else if (l instanceof LSymbol){
-        return l.toString()
+        return unwrapAtom(l) as string
     }
     else{
         throw Error("definition must be followed by a variable, expr: " + expr.toString())

@@ -3,7 +3,7 @@ import { Closure } from "./Closure"
 import { LSymbol } from "./LispElement"
 
 export class Environment{
-    private variables: {[key: string]: LispElement} = {}
+    private variables: {[key: string]: LispElement | Closure} = {}
 
     lookup(name: string): LispElement | null{
         if (this.variables[name] !== undefined){

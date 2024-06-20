@@ -2,6 +2,7 @@ export type LispElement = Atom | Expression | List | string;
 
 export type AtomValue = string | number | boolean 
 // ATOM
+import { inspect } from 'util';
 
 
 export function wrapValueIntoLispElement(value: any): LispElement{
@@ -122,12 +123,20 @@ export interface Atom{
     value : AtomValue
 }
 
+export function isAtom(atom: LispElement): boolean{
+    console.log(typeof atom)
+    console.log("atom =")
+    console.log(atom)
+    console.log(atom instanceof LSymbol)
+    return atom instanceof LSymbol || atom instanceof LNumber || atom instanceof LBoolean || atom instanceof LString
+}
+
 export function unwrapAtom(atom: any): AtomValue{
     if (atom instanceof LSymbol) return (atom as LSymbol).value
     else if (atom instanceof LNumber) return (atom as LNumber).value
     else if (atom instanceof LBoolean) return (atom as LBoolean).value
     else if (atom instanceof LString) return (atom as LString).value
-    else throw Error("unwrapAtom: not an atom")
+    else throw Error("unwrapAtom: not an atom:" + inspect(atom, { showHidden: true, depth: 5}))
 }
 
 export function createAtom(value: string): string{
@@ -161,7 +170,13 @@ export class LBoolean implements Atom{
     toString() {
         return `LBoolean(${this.value})`;
     }
+    
+    isTrue(): boolean{
+        return this.value
+    }
 }
+
+
 
 
 export class LString implements Atom{
