@@ -5,17 +5,17 @@ import { LBoolean, LNumber, LString, List, LSymbol, unwrapAtom } from "./definit
 import { pipe } from "effect";
 import { match_args } from "./tools/GenericProcedure/Predicates";
 import type { Env } from "bun";
-import { Environment } from "./definition/Environment";
-import { apply } from "./apply";
+import { Environment, is_environment } from "./definition/Environment";
+import { apply } from "./Apply";
 import { Closure } from "./definition/Closure";
 
-const advance = construct_simple_generic_procedure("advance", 1, 
+export const advance = construct_simple_generic_procedure("advance", 1, 
     (expr: LispElement) => {
        return expr 
     }
 )
 
-const evaluate = construct_simple_generic_procedure("evaluate",
+export const evaluate = construct_simple_generic_procedure("evaluate",
     2, default_eval
 )
 
@@ -37,7 +37,7 @@ function default_eval(expression: LispElement, env: Environment){
     if (isApplication(expression)){
         apply(
             advance(evaluate(operator(expression), env)),
-            operands(expression),
+            operands(expression) as List,
             env)
     }
     else{
@@ -60,10 +60,7 @@ function is_self_evaluating(expr: LispElement): boolean{
     return expr instanceof LNumber || expr instanceof LString || expr instanceof LBoolean 
 }
 
-function is_environment(env: Environment): boolean{
-    // i know this is dumb, will fix it later
-    return true
-}
+
 
 define_generic_procedure_handler(evaluate,
     match_args(is_quoted, is_environment),
@@ -135,7 +132,15 @@ function make_if(predicate: LispElement, consequent: LispElement, alternative: L
 define_generic_procedure_handler(evaluate,
     match_args(is_lambda, is_environment),
     (expr, env) => {
-        return make_compound_procedure(lambda_parameters(expr), lambda_body(expr), env)
+        const parameters = lambda_parameters(expr) as List
+        const body = lambda_body(expr)
+
+        if (parameters instanceof List){
+            return make_compound_procedure(parameters, body, env)
+        }
+        else{
+            throw Error("lambda must be followed by a list of parameters, expr: " + expr.toString())
+        }
     }
 )
 
@@ -191,11 +196,8 @@ function sequence_to_begin(seq: LispElement): LispElement{
     }
 }
 
-
-
-
-function make_compound_procedure(parameters: LispElement, body: LispElement, env: Environment): LispElement{
-    return new Closure(parameters, body, env)
+function make_compound_procedure(parameters: List, body: LispElement, env: Environment): LispElement{
+    return new Closure(parameters , body, env)
 }
 
 

@@ -3,6 +3,27 @@ export type LispElement = Atom | Expression | List | string;
 export type AtomValue = string | number | boolean 
 // ATOM
 
+
+export function wrapValueIntoLispElement(value: any): LispElement{
+    if (typeof value === "string") return new LSymbol(value)
+    else if (typeof value === "number") return new LNumber(value)
+    else if (typeof value === "boolean") return new LBoolean(value)
+    else return new LString(value)
+}
+
+export function unwrapLispElement(lispElement: LispElement): any{
+    if (lispElement instanceof LSymbol) {
+        throw Error("unwrapLispElement: LSymbol")
+    }
+    else if (lispElement instanceof LNumber) return lispElement.value
+    else if (lispElement instanceof LBoolean) return lispElement.value
+    else if (lispElement instanceof LString) return lispElement.value
+    else{
+        throw Error("unwrapLispElement: unsupported type: " + lispElement.toString())
+    }
+}
+
+
 export class List{
 
     constructor(private readonly elements: LispElement[]) {}
@@ -40,6 +61,10 @@ export class List{
 
     flatmap(func: (element: LispElement) => LispElement[]): List{
         return new List(this.elements.flatMap(func))
+    }
+
+    mapToArray(func: (element: LispElement) => any): any[]{
+        return this.elements.map(func)
     }
 
     getString(): string {
