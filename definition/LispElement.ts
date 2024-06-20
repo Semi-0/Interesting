@@ -20,7 +20,7 @@ export function unwrapLispElement(lispElement: LispElement): any{
     else if (lispElement instanceof LBoolean) return lispElement.value
     else if (lispElement instanceof LString) return lispElement.value
     else{
-        throw Error("unwrapLispElement: unsupported type: " + lispElement.toString())
+        throw Error("unwrapLispElement: unsupported type: " + inspect(lispElement, { showHidden: true, depth: 5}))
     }
 }
 
@@ -34,6 +34,14 @@ export class List{
             throw Error("Index out of bounds")
         }
         return this.elements[index]
+    }
+
+    head(): LispElement{
+        return this.elements[0]
+    } 
+
+    rest(): List{
+        return new List(this.elements.slice(1))
     }
 
     slice(start: number, end: number): List{
