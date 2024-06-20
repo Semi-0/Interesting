@@ -5,7 +5,43 @@ export type AtomValue = string | number | boolean
 
 export class List{
 
-    constructor(public readonly elements: LispElement[]) {}
+    constructor(private readonly elements: LispElement[]) {}
+
+    get_element(index: number): LispElement {
+        if (index < 0 || index >= this.elements.length) {
+            throw Error("Index out of bounds")
+        }
+        return this.elements[index]
+    }
+
+    slice(start: number, end: number): List{
+        return new List(this.elements.slice(start, end))
+    }
+
+    append(element: LispElement): List{
+        return new List([...this.elements, element])
+    }
+
+    unshift(element: LispElement): List{
+        return new List([element, ...this.elements])
+    }
+
+    length(): number{
+        return this.elements.length
+    }
+
+    map(func: (element: LispElement) => LispElement): List{
+        return new List(this.elements.map(func))
+    }
+
+    filter(func: (element: LispElement) => boolean): List{
+        return new List(this.elements.filter(func))
+    }
+
+    flatmap(func: (element: LispElement) => LispElement[]): List{
+        return new List(this.elements.flatMap(func))
+    }
+
     getString(): string {
         console.log("called")
         var result = "("
@@ -50,15 +86,23 @@ export function createList(elements: LispElement[]): List{
 }
 
 export function displayList(list: List): string{
-    return `(${list.elements.map(e => e.toString()).join(' ')})`
+    return list.getString()
 }
 
 export function appendItem(list: List, item: LispElement): List{
-    return new List([...list.elements, item])
+    return list.append(item)
 }
 
 export interface Atom{
     value : AtomValue
+}
+
+export function unwrapAtom(atom: any): AtomValue{
+    if (atom instanceof LSymbol) return (atom as LSymbol).value
+    else if (atom instanceof LNumber) return (atom as LNumber).value
+    else if (atom instanceof LBoolean) return (atom as LBoolean).value
+    else if (atom instanceof LString) return (atom as LString).value
+    else throw Error("unwrapAtom: not an atom")
 }
 
 export function createAtom(value: string): string{
