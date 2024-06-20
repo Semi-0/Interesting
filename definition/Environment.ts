@@ -1,11 +1,18 @@
 import type { LispElement, List } from "./LispElement"
 import { Closure } from "./Closure"
-import { LSymbol } from "./LispElement"
+import { LSymbol, PrimitiveSymbol } from "./LispElement"
+import { PrimitiveFunctions } from "./PrimitiveFunction"
+import { inspect } from "util"
 
 export class Environment{
     private variables: {[key: string]: LispElement | Closure} = {}
-
+    private primitive_functions = new PrimitiveFunctions()
     lookup(name: string): LispElement | null{
+
+        if (this.primitive_functions.isPrimitiveFunction(name)){
+            return new PrimitiveSymbol(name)
+        }
+
         if (this.variables[name] !== undefined){
             return this.variables[name]
         }
@@ -49,6 +56,7 @@ export class Environment{
                 throw Error("wrong number of arguments: " + names.get_element(i).toString())
             }
         }
+        console.log("variables: " + inspect(this.variables, {showHidden: true, depth: 5}))
         return this
     }
 

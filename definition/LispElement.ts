@@ -69,7 +69,6 @@ export class List{
     }
 
     getString(): string {
-        console.log("called")
         var result = "("
        for (const element of this.elements) {
         if (element instanceof List){
@@ -124,10 +123,6 @@ export interface Atom{
 }
 
 export function isAtom(atom: LispElement): boolean{
-    console.log(typeof atom)
-    console.log("atom =")
-    console.log(atom)
-    console.log(atom instanceof LSymbol)
     return atom instanceof LSymbol || atom instanceof LNumber || atom instanceof LBoolean || atom instanceof LString
 }
 
@@ -144,7 +139,6 @@ export function createAtom(value: string): string{
     // else if (typeof value === "number") return new LNumber(value)
     // else if (typeof value === "boolean") return new LBoolean(value)
     // else return new LString(value)
-    console.log("createAtom", value)
     return value
 }
 
@@ -155,7 +149,14 @@ export class LSymbol implements Atom{
         return `LSymbol(${this.value})`;
     }
 }
-console.log(new LSymbol("example")); 
+
+export class PrimitiveSymbol implements Atom{
+    constructor(public readonly value: string) {}
+    toString() {
+        return `PrimitiveSymbol(${this.value})`;
+    }
+}
+
 export class LNumber implements Atom{
     // stands for lisp number
     constructor(public readonly value: number) {}
