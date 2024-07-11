@@ -4,6 +4,33 @@ export type AtomValue = string | number | boolean
 // ATOM
 import { inspect } from 'util';
 
+enum SchemeType{
+    Atom = "Atom",
+    List = "List",
+    Expression = "Expression",
+    Lambda = "Lambda",
+    Let = "Let",
+    Call = "Call",
+    PrimitiveSymbol = "PrimitiveSymbol"
+}
+
+
+class SchemeElement{
+    readonly value: any 
+    readonly type: SchemeType
+    readonly reference : number
+    readonly Error: String
+
+    constructor(value : any, type: SchemeType, reference: number, Error: String){
+        this.value = value
+        this.type = type
+        this.reference = reference
+        this.Error = Error
+    }
+
+}
+
+
 
 export function wrapValueIntoLispElement(value: any): LispElement{
     if (typeof value === "string") return new LSymbol(value)
