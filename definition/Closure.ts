@@ -1,6 +1,6 @@
-import type {LispElement, List} from "./LispElement"
+import type {LispElement} from "./LispElement"
 import {Environment} from "./Environment"
 
 export class Closure{
-    constructor(public readonly parameters: List, public readonly body: LispElement, public readonly env: Environment){}
+    constructor(public readonly parameters: Array<LispElement>, public readonly body: LispElement, public readonly env: Environment){}
 }

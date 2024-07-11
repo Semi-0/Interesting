@@ -1,3 +1,4 @@
+
 export function guard(condition: boolean, else_branch: () => void): void {
     if (condition) {
         return
@@ -6,7 +7,9 @@ export function guard(condition: boolean, else_branch: () => void): void {
     }
 }
 
-import {MatcherBuilder} from "pmatcher/MatchBuilder"
 
-export const match = new MatcherBuilder()
+export function isArray<T>(x: any): x is Array<T> {
+    return Array.isArray(x)
+}
+
 

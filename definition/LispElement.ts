@@ -1,6 +1,7 @@
-export type LispElement = Atom | Expression | List | string;
+export type LispElement = Atom | Expression | Array<LispElement> | string ;
 
 export type AtomValue = string | number | boolean 
+import type { List } from 'effect';
 // ATOM
 import { inspect } from 'util';
 
@@ -22,108 +23,6 @@ export function unwrapLispElement(lispElement: LispElement): any{
     else{
         throw Error("unwrapLispElement: unsupported type: " + inspect(lispElement, { showHidden: true, depth: 5}))
     }
-}
-
-
-export class List{
-
-    constructor(private readonly elements: LispElement[]) {}
-
-    get_element(index: number): LispElement {
-        if (index < 0 || index >= this.elements.length) {
-            throw Error("Index out of bounds")
-        }
-        return this.elements[index]
-    }
-
-    head(): LispElement{
-        return this.elements[0]
-    } 
-
-    rest(): List{
-        return new List(this.elements.slice(1))
-    }
-
-    slice(start: number, end: number): List{
-        return new List(this.elements.slice(start, end))
-    }
-
-    append(element: LispElement): List{
-        return new List([...this.elements, element])
-    }
-
-    unshift(element: LispElement): List{
-        return new List([element, ...this.elements])
-    }
-
-    length(): number{
-        return this.elements.length
-    }
-
-    map(func: (element: LispElement) => LispElement): List{
-        return new List(this.elements.map(func))
-    }
-
-    filter(func: (element: LispElement) => boolean): List{
-        return new List(this.elements.filter(func))
-    }
-
-    flatmap(func: (element: LispElement) => LispElement[]): List{
-        return new List(this.elements.flatMap(func))
-    }
-
-    mapToArray(func: (element: LispElement) => any): any[]{
-        return this.elements.map(func)
-    }
-
-    getString(): string {
-        var result = "("
-       for (const element of this.elements) {
-        if (element instanceof List){
-            result += element.toString() + " "
-        }
-        else if (element instanceof LSymbol){
-            result += element.toString() + " "
-        }
-        else if (element instanceof LNumber){
-            result += element.toString() + " "
-        }
-        else if (element instanceof LBoolean){
-            result += element.toString() + " "
-        }
-        else if (element instanceof LString){
-            result += element.toString() + " "
-        }
-
-        else if (element instanceof Lambda){
-            result += element.toString() + " "
-        }
-        else if (element instanceof Let){
-            result += element.toString() + " "
-        }
-        else if (element instanceof Call){
-            result += element.toString() + " "
-        }
-        else {
-            result += "unknown" + " "
-        }
-        result += ")"
-        }
-        return result
-    }
-}           
-
-
-export function createList(elements: LispElement[]): List{
-    return new List(elements)
-}
-
-export function displayList(list: List): string{
-    return list.getString()
-}
-
-export function appendItem(list: List, item: LispElement): List{
-    return list.append(item)
 }
 
 export interface Atom{

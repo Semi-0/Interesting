@@ -3,6 +3,13 @@ import { Closure } from "./Closure"
 import { LSymbol, PrimitiveSymbol } from "./LispElement"
 import { PrimitiveFunctions } from "./PrimitiveFunction"
 import { inspect } from "util"
+import { construct_simple_generic_procedure, define_generic_procedure_handler } from "../tools/GenericProcedure/GenericProcedure"
+ 
+// can also refacted with generic procedure
+
+
+
+
 
 export class Environment{
     private variables: {[key: string]: LispElement | Closure} = {}
@@ -72,3 +79,4 @@ export class Environment{
 export function is_environment(probablyEnv: any): boolean{
    return probablyEnv instanceof Environment
 }
+

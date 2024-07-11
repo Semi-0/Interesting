@@ -1,5 +1,5 @@
 import { Parser, charCode, oneOf, skipMany1,  seq, char, many, noneOf, parse, State, choice, letter, digit, fmap, many1, sepBy } from "parse-combinator"
-import  { LString, LNumber, LSymbol, LBoolean, type LispElement, List } from "./definition/LispElement"
+import  { LString, LNumber, LSymbol, LBoolean, type LispElement } from "./definition/LispElement"
 import * as util from 'util';
 
 const symbol = oneOf("!#$%&|*+-/:<=>?@^_~\"")
@@ -38,14 +38,14 @@ const parseNumber : Parser<LispElement> = fmap(x => new LNumber(Number(x.join(""
 const parseQuoted : Parser<LispElement> = seq(m => {
     m(char("'"));
     const x = m(parseExpr);
-    return new List([ new LSymbol("quote"), x])
+    return [ new LSymbol("quote"), x]
 })
 
 const parseList : Parser<LispElement> = seq(m => {
     m(char("("));
     const x = m(sepBy(parseExpr, spaces));
     m(char(")"));
-    return new List(x)
+    return x
 })
 
 
