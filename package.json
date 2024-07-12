@@ -15,7 +15,7 @@
     "generic-handler": "^0.0.2",
     "jest": "^29.7.0",
     "parse-combinator": "^1.0.1",
-    "pmatcher": "^0.1.8",
+    "pmatcher": "^0.2.0",
     "runtypes": "^6.7.0",
     "ts-jest": "^29.2.2",
     "ts-pattern": "^5.2.0"

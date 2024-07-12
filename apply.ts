@@ -1,6 +1,6 @@
-import { construct_simple_generic_procedure, define_generic_procedure_handler } from "./tools/GenericProcedure/GenericProcedure"
-import { match_args } from "./tools/GenericProcedure/Predicates"
-import { LSymbol, type LispElement, List } from "./definition/LispElement"
+import { construct_simple_generic_procedure, define_generic_procedure_handler } from "generic-handler/GenericProcedure"
+import { match_args } from "generic-handler/Predicates"
+import { LSymbol, type LispElement } from "./definition/LispElement"
 import { is_environment, Environment } from "./definition/Environment"
 import { PrimitiveFunctions } from "./definition/PrimitiveFunction"
 import { evaluate, advance } from "./Evaluate"
@@ -20,7 +20,7 @@ function default_apply(procedure: LispElement, operands: LispElement[], env: Env
 }
 
 function is_operand(operand: LispElement): boolean{
-    return operand instanceof List
+    return operand instanceof Array
 }
 
 function is_primitive_function(lispElement: LispElement): boolean{
@@ -34,7 +34,7 @@ define_generic_procedure_handler(apply,
         is_environment,
     ),
     (primitive_function, operand, env) => {
-        return apply_primitive_procedure(primitive_function,  eval_operands(operand, env).mapToArray((v) => v))
+        return apply_primitive_procedure(primitive_function,  eval_operands(operand, env))
     }
 )
 
@@ -46,7 +46,7 @@ function apply_primitive_procedure(primitive_function: LSymbol, operands: LispEl
 }
 
 
-function eval_operands(operands: List, env: Environment): List{
+function eval_operands(operands: Array<LispElement>, env: Environment): Array<LispElement>{
     return operands.map(operand => advance(evaluate(operand, env)))
 }
 
@@ -57,7 +57,7 @@ define_generic_procedure_handler(apply,
         is_operand,
         is_environment
     ),
-    (procedure: Closure, operands: List, env: Environment) => {
+    (procedure: Closure, operands: Array<LispElement>, env: Environment) => {
         return apply_compound_procedure(procedure, operands, env)
     }
 )
@@ -66,8 +66,8 @@ function is_strict_compound_procedure(procedure: LispElement): boolean{
     return procedure instanceof Closure 
 }
 
-function apply_compound_procedure(procedure: Closure, operands: List, env: Environment): LispElement{
-    if (procedure.parameters.length() !== operands.length()){
+function apply_compound_procedure(procedure: Closure, operands: Array<LispElement>, env: Environment): LispElement{
+    if (procedure.parameters.length !== operands.length){
         throw Error("wrong number of arguments")
     }
     

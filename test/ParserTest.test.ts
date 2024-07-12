@@ -1,7 +1,7 @@
 import { parseExpr } from '../Parser';
 import {parse} from "parse-combinator"
 import { State } from 'parse-combinator';
-import { LString, LNumber, LSymbol, LBoolean, List } from '../definition/LispElement';
+import { LString, LNumber, LSymbol, LBoolean } from '../definition/LispElement';
 
 describe('parseExpr', () => {
   test('parses symbols correctly', () => {
@@ -35,26 +35,26 @@ describe('parseExpr', () => {
   test('parses quoted expressions correctly', () => {
     const input = new State("'x");
     const result = parse(parseExpr, input);
-    expect(result.value).toEqual(new List([new LSymbol("quote"), new LSymbol("x")]));
+    expect(result.value).toEqual([new LSymbol("quote"), new LSymbol("x")]);
   });
 
   test('parses lists correctly', () => {
     const input = new State("(a b c)");
     const result = parse(parseExpr, input);
-    expect(result.value).toEqual(new List([new LSymbol("a"), new LSymbol("b"), new LSymbol("c")]));
+    expect(result.value).toEqual([new LSymbol("a"), new LSymbol("b"), new LSymbol("c")]);
   });
 
   test('parses complex expressions correctly', () => {
     const input = new State("(lambda (x) (+ 1 2))");
     const result = parse(parseExpr, input);
-    expect(result.value).toEqual(new List([
+    expect(result.value).toEqual([
       new LSymbol("lambda"),
-      new List([new LSymbol("x")]),
-      new List([
+      [new LSymbol("x")],
+      [
         new LSymbol("+"),
         new LNumber(1),
         new LNumber(2)
-      ])
-    ]));
+      ]
+    ]);
   });
 });
