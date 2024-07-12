@@ -157,7 +157,7 @@ function construct_evaluator(default_handler: (data: any[], env: MatchEnvironmen
 function expr_store_dispatch(data: any[]):  evaluator | null {
     // how to handle expr mismatch?
     for (const [expr, handler] of ExprStore.entries()) {
-            const matchResult = run_matcher(build_matcher_expr(expr), data, (dict, nEaten) => {
+            const matchResult = run_matcher(build_matcher_expr(compile_to_matcher(expr)), data, (dict, nEaten) => {
                 return dict
             });
 
