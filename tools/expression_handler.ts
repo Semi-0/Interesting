@@ -16,7 +16,7 @@ import { SchemeElement, isSchemeStr } from "../definition/SchemeElement";
 import { match_args } from "generic-handler/Predicates";
 import { GenericProcedureMetadata } from "generic-handler/GenericProcedureMetadata";
 import { SimpleDispatchStore } from "generic-handler/DispatchStore";
-import type { MatchResult } from "./MatcherWrapper";
+// import type { MatchResult } from "./MatcherWrapper";
 import type { MatchPartialSuccess } from "pmatcher/MatchResult/PartialSuccess";
 
 
@@ -38,6 +38,19 @@ define_generic_procedure_handler(
     }
 )
 
+class Advice{
+    constructor(
+        readonly input_modifier : (...args: any[]) => any,
+        readonly output_modifier: (...args: any[]) => any
+    ){}
+}
+
+class Evaluator{
+    constructor(
+        readonly handler: (...args: any[]) => any,
+        readonly advices: Advice[]
+    ){}
+}
 
 
 // const expr_store = new Map<string[], evaluator>()
