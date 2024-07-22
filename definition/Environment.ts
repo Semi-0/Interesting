@@ -1,82 +1,81 @@
-import type { LispElement, List } from "./LispElement"
+import type { SchemeElement  } from "./SchemeElement"
 import { Closure } from "./Closure"
-import { LSymbol, PrimitiveSymbol } from "./LispElement"
 import { PrimitiveFunctions } from "./PrimitiveFunction"
 import { inspect } from "util"
-import { construct_simple_generic_procedure, define_generic_procedure_handler } from "../tools/GenericProcedure/GenericProcedure"
- 
+import { construct_simple_generic_procedure, define_generic_procedure_handler } from "generic-handler/GenericProcedure"
+import type{ PrimitiveFunction } from "./PrimitiveFunction"
+import { match_args } from "generic-handler/Predicates"
+import { isString } from "effect/Predicate"
+import { isArray } from "effect/Array"
 // can also refacted with generic procedure
 
-
-
-
-
 export class Environment{
-    private variables: {[key: string]: LispElement | Closure} = {}
-    private primitive_functions = new PrimitiveFunctions()
-    lookup(name: string): LispElement | null{
+    dict: {[key: string]: SchemeElement} = {}
 
-        if (this.primitive_functions.isPrimitiveFunction(name)){
-            return new PrimitiveSymbol(name)
-        }
-
-        if (this.variables[name] !== undefined){
-            return this.variables[name]
-        }
-        return null
-    }
-
-    lookup_symbol(name: LSymbol): LispElement | null{
-        return this.lookup(name.value)
-    }
-
-    extend(name: string, value: LispElement): Environment{
-        this.variables[name] = value
-        return this
-    }
-
-    extend_symbol(name: LSymbol, value: LispElement): Environment{
-        this.variables[name.value] = value
-        return this
-    }
-
-    extends(names: string[], values: LispElement[]): Environment{
-        for (let i = 0; i < names.length; i++){
-            this.variables[names[i]] = values[i]
-        }
-        return this
-    }
-
-    extends_symbols(names: LSymbol[], values: LispElement[]): Environment{
-        for (let i = 0; i < names.length; i++){
-            this.variables[names[i].value] = values[i]
-        }
-        return this
-    }
-
-    extends_list(names: List, values: List): Environment{
-        for (let i = 0; i < names.length(); i++){
-            if (names.get_element(i) instanceof LSymbol){
-                this.variables[(names.get_element(i) as LSymbol).value] = values.get_element(i)
-            }
-            else{
-                throw Error("wrong number of arguments: " + names.get_element(i).toString())
-            }
-        }
-        console.log("variables: " + inspect(this.variables, {showHidden: true, depth: 5}))
-        return this
-    }
-
-    set(name: string, value: LispElement){
-        this.variables[name] = value
-    }
-
-    define_closure(name: string, closure: Closure){
-        this.variables[name] = closure
+    copy(): Environment {
+        const newEnv = new Environment();
+        newEnv.dict = { ...this.dict };
+        return newEnv;
     }
 }
+
+
+
+
+const lookup = construct_simple_generic_procedure("lookup", 2, (key: string, env: any) =>{ throw Error("no arg match for lookup")})
+
+define_generic_procedure_handler(
+    lookup, 
+    match_args(isString, is_environment), 
+    (key: string, env: Environment) => {
+        const v = env.dict[key];
+        if (v) {
+            return v;
+        } else {
+            return null;
+        }
+    }
+);
+
+const extend = construct_simple_generic_procedure("extend", 3, (key: string, value: SchemeElement, env: any) => { throw Error("no arg match for extend") });
+
+define_generic_procedure_handler(
+    extend,
+    match_args(isString, (_: any) => true, is_environment),
+    (key: string, value: SchemeElement, env: Environment) => {
+        var c = env.copy()
+        set(key, value, c)
+        return env;
+    }
+);
+
+define_generic_procedure_handler(
+    extend,
+    match_args(isArray, isArray, is_environment),
+    (keys: string[], values: any[], env: Environment) => {
+
+        if (keys.length !== values.length){
+            throw Error(`failed extending env, key length ${keys.length} does not match value length ${values.length}`);
+        }
+
+        var c = env.copy()
+        for (let i = 0; i < keys.length; i++){
+            set(keys[i], values[1], c)
+        }
+        return c
+    }
+)
+
+const set = construct_simple_generic_procedure("set", 3, (key: string, value: SchemeElement, env: any) => { throw Error("no arg match for set") });
+
+define_generic_procedure_handler(
+    set,
+    match_args(isString, (_: any) => true, is_environment),
+    (key: string, value: SchemeElement, env: Environment) => {
+        env.dict[key] = value;
+    }
+);
 
 export function is_environment(probablyEnv: any): boolean{
    return probablyEnv instanceof Environment
 }
-

@@ -1,7 +1,7 @@
 import { parseExpr } from '../Parser';
 import {parse} from "parse-combinator"
 import { State } from 'parse-combinator';
-import { LString, LNumber, LSymbol, LBoolean } from '../definition/LispElement';
+import { LString, LNumber, LSymbol, LBoolean } from '../definition/SchemeElement';
 
 describe('parseExpr', () => {
   test('parses symbols correctly', () => {

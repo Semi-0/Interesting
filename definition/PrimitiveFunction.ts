@@ -1,4 +1,7 @@
+export type PrimitiveFunction = (...args: any[]) => any
+
 export class PrimitiveFunctions {
+
     private functions: {[key: string]: Function} = {
         ["+"]: (...args: any[]) => {
             return args.reduce((acc, curr) => acc + curr, 0);

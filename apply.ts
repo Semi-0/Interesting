@@ -1,12 +1,12 @@
 import { construct_simple_generic_procedure, define_generic_procedure_handler } from "generic-handler/GenericProcedure"
 import { match_args } from "generic-handler/Predicates"
-import { LSymbol, type LispElement } from "./definition/LispElement"
+import { LSymbol, type LispElement } from "./definition/SchemeElement"
 import { is_environment, Environment } from "./definition/Environment"
 import { PrimitiveFunctions } from "./definition/PrimitiveFunction"
 import { evaluate, advance } from "./Evaluate"
-import { LNumber, LString, LBoolean, wrapValueIntoLispElement, unwrapLispElement } from "./definition/LispElement"
+import { LNumber, LString, LBoolean, wrapValueIntoLispElement, unwrapLispElement } from "./definition/SchemeElement"
 import { Closure } from "./definition/Closure"
-import { PrimitiveSymbol } from "./definition/LispElement"
+import { PrimitiveSymbol } from "./definition/SchemeElement"
 import { inspect } from "util"
 
 const primitive_environment = new PrimitiveFunctions()

@@ -1,5 +1,5 @@
 import { Parser, charCode, oneOf, skipMany1,  seq, char, many, noneOf, parse, State, choice, letter, digit, fmap, many1, sepBy } from "parse-combinator"
-import  { LString, LNumber, LSymbol, LBoolean, type LispElement } from "./definition/LispElement"
+import  { SchemeElement, schemeStr, schemeNumber, schemeBoolean, schemeReserved, schemeList } from "./definition/SchemeElement"
 import * as util from 'util';
 
 const symbol = oneOf("!#$%&|*+-/:<=>?@^_~\"")
@@ -12,7 +12,7 @@ const parseString = seq(m =>{
         noneOf("\"")
     ));
     m(char('"'));
-    return x == undefined ? x : new LString(x.join(""))
+    return x == undefined ? x : schemeStr(x.join(""))
 })
 
 const parseBoolean = seq(m => {
@@ -21,7 +21,7 @@ const parseBoolean = seq(m => {
         char("t"),
         char("f"),
     ]))
-    return rest === "t" ? new LBoolean(true) : new LBoolean(false)
+    return rest === "t" ? schemeBoolean(true) : schemeBoolean(false)
 })
 
 const parseAtom = seq(m =>{
@@ -30,26 +30,26 @@ const parseAtom = seq(m =>{
     symbol,
     digit
    ])))
-   return all == undefined ? all : new LSymbol(all.join(""))
+   return all == undefined ? all : schemeReserved(all.join(""))
 })
 
-const parseNumber : Parser<LispElement> = fmap(x => new LNumber(Number(x.join(""))), many1(digit))
+const parseNumber : Parser<SchemeElement> = fmap(x => schemeNumber(Number(x.join(""))), many1(digit))
 
-const parseQuoted : Parser<LispElement> = seq(m => {
+const parseQuoted : Parser<SchemeElement> = seq(m => {
     m(char("'"));
     const x = m(parseExpr);
-    return [ new LSymbol("quote"), x]
+    return schemeList([schemeReserved("quote"), x])
 })
 
-const parseList : Parser<LispElement> = seq(m => {
+const parseList : Parser<SchemeElement> = seq(m => {
     m(char("("));
     const x = m(sepBy(parseExpr, spaces));
     m(char(")"));
-    return x
+    return schemeList(x)
 })
 
 
-export const parseExpr: Parser<LispElement> = choice([
+export const parseExpr: Parser<SchemeElement> = choice([
     parseNumber,
     parseBoolean,
     parseString,
@@ -61,5 +61,6 @@ export const parseExpr: Parser<LispElement> = choice([
 
 
 
-// const test = parse(parseExpr, new State("(lambda (x) (+ 1 2))"))
+const test = parse(parseExpr, new State("(lambda (x) (+ 1 2))"))
+console.log(test.toString())
 // console.log(util.inspect(test, {showHidden: true, depth: 8}))

@@ -1,5 +1,5 @@
 import { evaluate  } from '../Evaluate';
-import { LNumber, LSymbol,  LBoolean } from '../definition/LispElement';
+import { LNumber, LSymbol,  LBoolean } from '../definition/SchemeElement';
 import { Environment } from '../definition/Environment';
 
 describe('Interpreter Tests', () => {

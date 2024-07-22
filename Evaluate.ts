@@ -1,7 +1,7 @@
 import { define_generic_procedure_handler, construct_simple_generic_procedure } from "generic-handler/GenericProcedure"; 
 
-import type { LispElement, Atom } from "./definition/LispElement";
-import { LBoolean, LNumber, LString , LSymbol, unwrapAtom, isAtom } from "./definition/LispElement"
+import type { LispElement, Atom } from "./definition/SchemeElement";
+import { LBoolean, LNumber, LString , LSymbol, unwrapAtom, isAtom } from "./definition/SchemeElement"
 import { pipe } from "effect";
 import { match_args } from "generic-handler/Predicates";
 import type { Env } from "bun";
