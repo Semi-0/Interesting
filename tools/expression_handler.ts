@@ -8,7 +8,7 @@ import { first, isArray } from "pmatcher/GenericArray";
 import { inspect } from "bun";
 import 'ts-array-extensions'
 import { v4 as uuidv4} from 'uuid';
-import { isString } from "effect/Predicate";
+import { isNumber, isString } from "effect/Predicate";
 import { match_constant } from "pmatcher/MatchCombinator";
 import { equal } from "pmatcher/utility";
 import { SchemeElement, isSchemeStr } from "../definition/SchemeElement";
@@ -21,12 +21,9 @@ import type { MatchPartialSuccess } from "pmatcher/MatchResult/PartialSuccess";
 import { match } from "pmatcher/MatchBuilder"
 import { isSucceed } from "pmatcher/Predicates";
 import { MatchResult } from "pmatcher/MatchResult/MatchResult";
-import { get_input_modifiers, get_output_modifier } from "./Advice";
+import { construct_advice, get_input_modifiers, get_output_modifier } from "./Advice";
+import { apply } from "pmatcher/MatchResult/MatchGenericProcs"
 
-// // console.log(compile_to_matcher(["test", [E.arg, "a"], [[[E.arg, "b"], [E.arg, "c"]], "..."], [[E.arg, "c"], [E.arg, "d"]]]))
-
-
-// // TODO: adapt our short expression language to matcher language in the evaluator
 type evaluator = (expr: any[], 
     env: MatchEnvironment, 
     continuation: (expr: any[], env: MatchEnvironment) => any) => any
@@ -41,7 +38,7 @@ define_generic_procedure_handler(
 )
 
 
-function define_generic_matcher(proc: (... args: any) => any, matcher_expr: any[], handler: (...args: any[]) => any, specified_advices: any[] = []){
+export function define_generic_matcher(proc: (... args: any) => any, matcher_expr: any[], handler: (...args: any[]) => any, specified_advices: any[] = []){
     var matchResult: MatchResult | null = null
 
 
@@ -52,8 +49,13 @@ function define_generic_matcher(proc: (... args: any) => any, matcher_expr: any[
     return define_generic_procedure_handler(proc,
         (input: any[], ...args: any[]) => {
             const processed_matcher_expr = input_modifiers.reduce((acc, advice) => {
-                const input_modifier = first(advice)
-                return input_modifier(acc)
+                if (advice.length > 0){
+                    const input_modifier = first(advice)
+                    return input_modifier(acc)
+                }
+                else{
+                    return acc
+                }
             }, matcher_expr)
             matchResult = match(input, processed_matcher_expr)
             if (isSucceed(matchResult)){
@@ -78,13 +80,36 @@ function define_generic_matcher(proc: (... args: any) => any, matcher_expr: any[
     })
 }
 
-const test_eval = construct_simple_generic_procedure("test_eval", 2, (...args: any[]) => {
-    return args[0] + args[1]
-})
 
-define_generic_matcher(test_eval, [[P.element, "a"], "b"], (result: MatchResult, other: number) => {
-    console.log(inspect(result))
-    console.log(other)
-})
+// class test_class{
+//     a: number
+//     constructor(a: number){
+//         this.a = a
+//     }
+// }
 
-test_eval([1, "b"], 2)
+// function isTestClass(a: any): a is test_class{
+//     return a instanceof test_class
+// }
+
+// const result = match([new test_class(1)] ,[P.element, "a", (a: any) => isTestClass(a)])
+// console.log(inspect(result))
+
+// const test_eval = construct_simple_generic_procedure("test_eval", 2, (...args: any[]) => {
+//     return args[0] + args[1]
+// })
+
+// function log_advice(){
+//     var match_expr: any[] = []
+//     return construct_advice([(expr: any[], ...args: any[]) => { match_expr = expr; return expr}], (a: any) => { console.log("here we go", match_expr, a) ; return a})
+// }
+
+// define_generic_matcher(test_eval, 
+//     [[P.element, "a"], "b"], 
+//     (result: MatchResult, other: number) => {
+//         return apply((a: any) => { return Number(a) + other }, result)
+//     })
+
+
+
+// console.log(test_eval([1, "b"], 2))

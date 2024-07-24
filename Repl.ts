@@ -1,6 +1,6 @@
 import {parseExpr} from "./Parser"
 import {parse, State} from "parse-combinator"
-import {evaluate} from "./Evaluate"
+import {evaluate} from "./Evaluate(deprecated)"
 import { Environment } from "./definition/Environment"
 import { unwrapLispElement } from "./definition/SchemeElement"
 
