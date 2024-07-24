@@ -1,7 +1,11 @@
 import { Parser, charCode, oneOf, skipMany, seq, char, many, noneOf, parse, State, choice, letter, digit, fmap, many1, optional } from "parse-combinator"
+import { match } from "pmatcher/MatchBuilder"
 
-
-
+export function make_matcher(expr: any[]){
+  return (input: any) => {
+    return match(input, expr)
+  }
+}
 
 export function generic_wrapper(
     functionToWrap: (...args: any[]) => any,

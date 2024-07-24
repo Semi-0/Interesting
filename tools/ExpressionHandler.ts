@@ -5,9 +5,14 @@ import { match } from "pmatcher/MatchBuilder"
 import { isSucceed } from "pmatcher/Predicates";
 import { MatchResult } from "pmatcher/MatchResult/MatchResult";
 import { construct_advice, install_advice } from "./Advice";
-
+import { apply } from "pmatcher/MatchResult/MatchGenericProcs"
 export const no_change : (proc:any) => any =  (proc: any) => { return proc }
 
+const make_exec = (result: MatchResult) => {
+    return (proc: (...args: any[]) => any) => {
+        return apply(proc, result)
+    }
+}
 
 export function matcher_advice() : any[]{
     var matchResult: MatchResult | null = null 
@@ -19,10 +24,10 @@ export function matcher_advice() : any[]{
                                     return isSucceed(matchResult)
                                 }
                               },
-                              (handler: (mresult: MatchResult, ...args: any[]) => any) => { 
+                              (handler: (exec: (...args: any[]) => any, ...args: any[]) => any) => { 
                                 return (result: any, ...args: any[]) => {
-                                    // @ts-ignore
-                                    return handler(matchResult, ...args)
+                                    //@ts-ignore
+                                    return handler(make_exec(matchResult), ...args)
                                 }}]
     return construct_advice(input_modifers, no_change)
 }

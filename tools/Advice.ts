@@ -1,4 +1,4 @@
-import { generic_wrapper } from "./generic-wrapper";
+import { generic_wrapper } from "./GenericWrapper";
 import { match } from "pmatcher/MatchBuilder"
 import { MatchResult } from "pmatcher/MatchResult/MatchResult";
 

@@ -1,5 +1,5 @@
 import { Parser, charCode, oneOf, skipMany1,  seq, char, many, noneOf, parse, State, choice, letter, digit, fmap, many1, sepBy } from "parse-combinator"
-import  { SchemeElement, schemeStr, schemeNumber, schemeBoolean, schemeReserved, schemeList } from "./definition/SchemeElement"
+import  { SchemeElement, schemeStr, schemeNumber, schemeBoolean, schemeSymbol, schemeList } from "./definition/SchemeElement"
 import * as util from 'util';
 
 const symbol = oneOf("!#$%&|*+-/:<=>?@^_~\"")
@@ -30,7 +30,7 @@ const parseAtom = seq(m =>{
     symbol,
     digit
    ])))
-   return all == undefined ? all : schemeReserved(all.join(""))
+   return all == undefined ? all : schemeSymbol(all.join(""))
 })
 
 const parseNumber : Parser<SchemeElement> = fmap(x => schemeNumber(Number(x.join(""))), many1(digit))
@@ -38,7 +38,7 @@ const parseNumber : Parser<SchemeElement> = fmap(x => schemeNumber(Number(x.join
 const parseQuoted : Parser<SchemeElement> = seq(m => {
     m(char("'"));
     const x = m(parseExpr);
-    return schemeList([schemeReserved("quote"), x])
+    return schemeList([schemeSymbol("quote"), x])
 })
 
 const parseList : Parser<SchemeElement> = seq(m => {

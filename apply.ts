@@ -1,76 +1,75 @@
 import { construct_simple_generic_procedure, define_generic_procedure_handler } from "generic-handler/GenericProcedure"
 import { match_args } from "generic-handler/Predicates"
-import { LSymbol, type LispElement } from "./definition/SchemeElement"
+import { SchemeElement, is_scheme_symbol  } from "./definition/SchemeElement"
+
 import { is_environment, Environment } from "./definition/Environment"
 import { PrimitiveFunctions } from "./definition/PrimitiveFunction"
-import { evaluate, advance } from "./Evaluate(deprecated)"
-import { LNumber, LString, LBoolean, wrapValueIntoLispElement, unwrapLispElement } from "./definition/SchemeElement"
 import { Closure } from "./definition/Closure"
-import { PrimitiveSymbol } from "./definition/SchemeElement"
 import { inspect } from "util"
+import { SchemeType } from "./definition/SchemeElement"
 
-const primitive_environment = new PrimitiveFunctions()
+import { map_procedure } from "./definition/SchemeElement"
+import { is_continuation } from "./Evaluator"
+import { extend } from "./definition/Environment"
 
 export const apply = construct_simple_generic_procedure("apply",
-    3, default_apply
+    4, default_apply
 )
 
-function default_apply(procedure: LispElement, operands: LispElement[], env: Environment){
+function default_apply(procedure: SchemeElement, operands: SchemeElement[], env: Environment, continuation: (result: SchemeElement, env: Environment) => SchemeElement){
    throw Error("unknown procedure type" + procedure.toString() + "with operands" + operands.toString() + "in environment" + env.toString())
 }
 
-function is_operand(operand: LispElement): boolean{
-    return operand instanceof Array
+function is_operands(operands: SchemeElement[]): boolean{
+    return operands instanceof Array
 }
 
-function is_primitive_function(lispElement: LispElement): boolean{
-    return lispElement instanceof PrimitiveSymbol 
+function is_primitive_call(operator: SchemeElement): boolean{
+    return  operator.is_type(SchemeType.PrimitiveCall)
 }
 
 define_generic_procedure_handler(apply,
     match_args( 
-        is_primitive_function,
-        is_operand,
+        is_primitive_call,
+        is_operands,
         is_environment,
+        is_continuation,
     ),
-    (primitive_function, operand, env) => {
-        return apply_primitive_procedure(primitive_function,  eval_operands(operand, env))
+    (operator, operands, env, continuation) => {
+        return apply_primitive_function(operator,  ...eval_operands(operands, env, continuation))
     }
 )
 
-function apply_primitive_procedure(primitive_function: LSymbol, operands: LispElement[]): LispElement{
-   let generalized_values = operands.map((value: LispElement) => {
-        return unwrapLispElement(value)
-    })
-   return  wrapValueIntoLispElement(primitive_environment.applyFunction(primitive_function.value, ...generalized_values))
+export function apply_primitive_function(func: SchemeElement, ...args: SchemeElement[]): SchemeElement{
+    return map_procedure(func, (f: (...args: any[]) => any) => f(...args.map((arg: SchemeElement) => arg.get_value())))
 }
 
-
-function eval_operands(operands: Array<LispElement>, env: Environment): Array<LispElement>{
-    return operands.map(operand => advance(evaluate(operand, env)))
+function eval_operands(operands: SchemeElement[], env: Environment, continuation: (result: SchemeElement, env: Environment) => SchemeElement): SchemeElement[]{
+    return operands.map(operand => continuation(operand, env))
 }
 
 
 define_generic_procedure_handler(apply, 
     match_args(
         is_strict_compound_procedure,
-        is_operand,
-        is_environment
+        is_operands,
+        is_environment,
+        is_continuation,
     ),
-    (procedure: Closure, operands: Array<LispElement>, env: Environment) => {
-        return apply_compound_procedure(procedure, operands, env)
+    (procedure: Closure, operands: SchemeElement[], env: Environment, continuation: (result: SchemeElement, env: Environment) => SchemeElement) => {
+        return apply_compound_procedure(procedure, eval_operands(operands, env, continuation), env, continuation)
     }
 )
 
-function is_strict_compound_procedure(procedure: LispElement): boolean{
-    return procedure instanceof Closure 
+function is_strict_compound_procedure(procedure: SchemeElement): boolean{
+    return procedure.is_type(SchemeType.Closure)
 }
 
-function apply_compound_procedure(procedure: Closure, operands: Array<LispElement>, env: Environment): LispElement{
+function apply_compound_procedure(procedure: Closure, operands: SchemeElement[], env: Environment, continuation: (result: SchemeElement, env: Environment) => SchemeElement): SchemeElement{
     if (procedure.parameters.length !== operands.length){
         throw Error("wrong number of arguments")
     }
     
-    let new_env = env.extends_list(procedure.parameters, eval_operands(operands, env))
-    return evaluate(procedure.body, new_env)
+    let new_env = extend(procedure.parameters, operands, env)
+    return continuation(procedure.body, new_env)
 }

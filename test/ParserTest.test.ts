@@ -1,12 +1,12 @@
 import { parseExpr } from '../Parser';
 import { parse, State } from "parse-combinator";
-import { SchemeElement, schemeStr, schemeNumber, schemeReserved, schemeBoolean, schemeList } from '../definition/SchemeElement';
+import { SchemeElement, schemeStr, schemeNumber,  schemeBoolean, schemeList, schemeSymbol } from '../definition/SchemeElement';
 
 describe('parseExpr', () => {
   test('parses symbols correctly', () => {
     const input = new State("hello");
     const result = parse(parseExpr, input);
-    expect(result.value).toEqual(schemeReserved("hello"));
+    expect(result.value).toEqual(schemeSymbol("hello"));
   });
 
   test('parses numbers correctly', () => {
@@ -34,16 +34,16 @@ describe('parseExpr', () => {
   test('parses quoted expressions correctly', () => {
     const input = new State("'x");
     const result = parse(parseExpr, input);
-    expect(result.value).toEqual(schemeList([schemeReserved("quote"), schemeReserved("x")]));
+    expect(result.value).toEqual(schemeList([schemeSymbol("quote"), schemeSymbol("x")]));
   });
 
   test('parses lists correctly', () => {
     const input = new State("(a b c)");
     const result = parse(parseExpr, input);
     expect(result.value).toEqual(schemeList([
-      schemeReserved("a"),
-      schemeReserved("b"),
-      schemeReserved("c")
+      schemeSymbol("a"),
+      schemeSymbol("b"),
+      schemeSymbol("c")
     ]));
   });
 
@@ -51,10 +51,10 @@ describe('parseExpr', () => {
     const input = new State("(lambda (x) (+ 1 2))");
     const result = parse(parseExpr, input);
     expect(result.value).toEqual(schemeList([
-      schemeReserved("lambda"),
-      schemeList([schemeReserved("x")]),
+      schemeSymbol("lambda"),
+      schemeList([schemeSymbol("x")]),
       schemeList([
-        schemeReserved("+"),
+        schemeSymbol("+"),
         schemeNumber(1),
         schemeNumber(2)
       ])
