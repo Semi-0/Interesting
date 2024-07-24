@@ -154,6 +154,10 @@ export function isSchemeArray(value: SchemeElement): boolean{
         return is_scheme_element(value) && value.is_type(SchemeType.List)
 }
 
+export function construct_primitive_procedure(func: Function): SchemeElement{
+    return new SchemeElement(func, SchemeType.PrimitiveFunc)
+}
+
 // adaptor for generic_array
 
 import { get_element, set_element, get_length, isArray } from 'pmatcher/GenericArray';

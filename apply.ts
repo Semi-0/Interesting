@@ -3,7 +3,6 @@ import { match_args } from "generic-handler/Predicates"
 import { SchemeElement, is_scheme_symbol  } from "./definition/SchemeElement"
 
 import { is_environment, Environment } from "./definition/Environment"
-import { PrimitiveFunctions } from "./definition/PrimitiveFunction"
 import { Closure } from "./definition/Closure"
 import { inspect } from "util"
 import { SchemeType } from "./definition/SchemeElement"
