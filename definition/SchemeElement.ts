@@ -22,7 +22,8 @@ export enum SchemeType{
     PrimitiveCall = "PrimitiveCall",
     Closure = "Closure",
     PrimitiveFunc = "PrimitiveFunc",
-    Unknown = "Unknown"
+    Unknown = "Unknown",
+    Feedback = "Feedback"
 }
 
 
@@ -158,6 +159,10 @@ export function construct_primitive_procedure(func: Function): SchemeElement{
     return new SchemeElement(func, SchemeType.PrimitiveFunc)
 }
 
+
+export function construct_feedback(msg: string): SchemeElement{
+    return new SchemeElement(msg, SchemeType.Feedback)
+}
 // adaptor for generic_array
 
 import { get_element, set_element, get_length, isArray } from 'pmatcher/GenericArray';

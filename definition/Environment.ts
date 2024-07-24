@@ -1,4 +1,4 @@
-import { is_scheme_element, is_scheme_symbol, map_procedure, type SchemeElement  } from "./SchemeElement"
+import { construct_feedback, is_scheme_element, is_scheme_symbol, map_procedure, type SchemeElement  } from "./SchemeElement"
 import { Closure } from "./Closure"
 import {  is_package, make_primitive_package } from "./PrimitiveFunction"
 import { inspect } from "util"
@@ -9,6 +9,10 @@ import { isString } from "effect/Predicate"
 import { isArray } from "effect/Array"
 import { zip } from "effect/Array"
 // can also refacted with generic procedure
+
+
+// TODO: CHANGE TO LEXICIAL SCOPING
+
 import type { Package } from "./PrimitiveFunction"
 export class Environment{
     dict: {[key: string]: SchemeElement} = {}
@@ -53,9 +57,9 @@ define_generic_procedure_handler(
 
 define_generic_procedure_handler(
     lookup,
-    match_args(is_scheme_symbol, is_package),
-    (key: SchemeElement, pkg: Package) => {
-        return pkg.functions[key.get_value()];
+    match_args(isString, is_package),
+    (key: string, pkg: Package) => {
+        return pkg.functions[key];
     }
 );
 
@@ -65,8 +69,8 @@ function is_packages(probablyPackages: any): boolean {
 
 define_generic_procedure_handler(
     lookup,
-    match_args(is_scheme_symbol, is_packages),
-    (key: SchemeElement, packages: Package[]) => {
+    match_args(isString, is_packages),
+    (key: string, packages: Package[]) => {
         for (const pkg of packages) {
             const value = lookup(key, pkg)
             if (value) {
@@ -81,12 +85,13 @@ define_generic_procedure_handler(
     lookup,
     match_args(is_scheme_symbol, is_environment),
     (key: SchemeElement, env: Environment) => {
-        const v = env.dict[key.get_value()];
+        const k = key.get_value()
+        const v = lookup(k, env)
         if (v) {
             return v;
         }
         else {
-            return lookup(key, env.loaded_packages)
+            return lookup(k, env.loaded_packages)
         }
     }
 );
@@ -100,9 +105,18 @@ define_generic_procedure_handler(
     (key: string, value: SchemeElement, env: Environment) => {
         var c = env.copy()
         set(key, value, c)
-        return env;
+        return c;
     }
 );
+
+
+define_generic_procedure_handler(
+    extend,
+    match_args(is_scheme_symbol, is_scheme_element, is_packages),
+    (key: SchemeElement, value: SchemeElement, packages: Package[]) => {
+        return extend(key.get_value(), value, packages)
+    }
+)
 
 define_generic_procedure_handler(
     extend,
@@ -125,20 +139,38 @@ define_generic_procedure_handler(
     match_args(isString, is_scheme_element, is_environment),
     (key: string, value: SchemeElement, env: Environment) => {
         env.dict[key] = value;
+        return construct_feedback(key + " set to " + value)
     }
 );
+
+define_generic_procedure_handler(
+    set,
+    match_args(is_scheme_symbol, is_scheme_element, is_packages),
+    (key: SchemeElement, value: SchemeElement, packages: Package[]) => {
+        return set(key.get_value(), value, packages)
+    }
+)
 
 export function is_environment(probablyEnv: any): boolean{
    return probablyEnv instanceof Environment
 }
 
-export const define = construct_simple_generic_procedure("define", 2, (key: string, value: SchemeElement) => { throw Error("no arg match for define") });
+export const extend_def = construct_simple_generic_procedure("define", 2, (key: string, value: SchemeElement) => { throw Error("no arg match for define") });
 
 define_generic_procedure_handler(
-    define,
+    extend_def,
     match_args(isString, is_scheme_element, is_environment),
     (key: string, value: SchemeElement, env: Environment) => {
         // temporary, TODO: check whether in current scope value has already been defined 
         set(key, value, env)
+        return construct_feedback(key + " defined" + " with " + value)
     }
 );
+
+define_generic_procedure_handler(
+    extend_def,
+    match_args(is_scheme_symbol, is_scheme_element, is_packages),
+    (key: SchemeElement, value: SchemeElement, packages: Package[]) => {
+        return extend_def(key.get_value(), value, packages)
+    }
+)

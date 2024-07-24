@@ -1,7 +1,7 @@
 import { construct_simple_generic_procedure } from "generic-handler/GenericProcedure"
 import { SchemeType,  SchemeElement, is_self_evaluating, schemeSymbol, is_true } from "./definition/SchemeElement"
 import { define_generic_matcher } from "./tools/ExpressionHandler"
-import { define, lookup, type Environment } from "./definition/Environment"
+import { extend_def, lookup, type Environment } from "./definition/Environment"
 import {P} from "pmatcher/MatchBuilder"
 import { isSucceed } from "pmatcher/Predicates"
 import { apply as apply_matched} from "pmatcher/MatchResult/MatchGenericProcs"
@@ -199,7 +199,7 @@ const match_assignment = make_matcher(["set!", [P.element, "name"], [P.element, 
 
 define_generic_matcher(evaluate, match_assignment, ((exec, env, continuation): EvalHandler => {
     return exec((name: SchemeElement, value: SchemeElement) => {
-        set(name, continuation(value, env), env)
+       return set(name, continuation(value, env), env)
     });
 }) as EvalHandler);
 
@@ -213,11 +213,11 @@ const match_define = make_matcher(
 define_generic_matcher(evaluate, match_define, ((exec, env, continuation): EvalHandler => {
     return exec((name: SchemeElement, parameters: SchemeElement[] | string, body: SchemeElement[]) => {
         if (parameters === will_define){
-            define(name, continuation(seq_to_begin(body), env), env)
+            return extend_def(name, continuation(seq_to_begin(body), env), env)
         }
         else{
             // @ts-ignore
-            define(name, make_lambda(parameters, body), env)
+            return extend_def(name, make_lambda(parameters, body), env)
         }
     });
 }) as EvalHandler);
