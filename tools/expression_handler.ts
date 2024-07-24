@@ -1,4 +1,4 @@
-import {  compile,  run_matcher, first_equal_with, P} from "pmatcher/MatchBuilder";
+import {  compile,  run_matcher, first_equal_with, P, try_match} from "pmatcher/MatchBuilder";
 import {  type matcher_instance } from "pmatcher/MatchCallback";
 import { is_match_key, type MatchDict } from "pmatcher/MatchDict/MatchDict";
 import { construct_simple_generic_procedure } from "generic-handler/GenericProcedure";
@@ -18,7 +18,10 @@ import { GenericProcedureMetadata } from "generic-handler/GenericProcedureMetada
 import { SimpleDispatchStore } from "generic-handler/DispatchStore";
 // import type { MatchResult } from "./MatcherWrapper";
 import type { MatchPartialSuccess } from "pmatcher/MatchResult/PartialSuccess";
-
+import { match } from "pmatcher/MatchBuilder"
+import { isSucceed } from "pmatcher/Predicates";
+import { MatchResult } from "pmatcher/MatchResult/MatchResult";
+import { get_input_modifiers, get_output_modifier } from "./Advice";
 
 // // console.log(compile_to_matcher(["test", [E.arg, "a"], [[[E.arg, "b"], [E.arg, "c"]], "..."], [[E.arg, "c"], [E.arg, "d"]]]))
 
@@ -28,7 +31,6 @@ type evaluator = (expr: any[],
     env: MatchEnvironment, 
     continuation: (expr: any[], env: MatchEnvironment) => any) => any
 
-type ExprStore = Map<string[], evaluator>
 
 define_generic_procedure_handler(
     equal, 
@@ -38,65 +40,51 @@ define_generic_procedure_handler(
     }
 )
 
-class Advice{
-    constructor(
-        readonly input_modifier : (...args: any[]) => any,
-        readonly output_modifier: (...args: any[]) => any
-    ){}
+
+function define_generic_matcher(proc: (... args: any) => any, matcher_expr: any[], handler: (...args: any[]) => any, specified_advices: any[] = []){
+    var matchResult: MatchResult | null = null
+
+
+    const input_modifiers = specified_advices.map(get_input_modifiers)
+    const output_modifiers = specified_advices.map(get_output_modifier)
+
+
+    return define_generic_procedure_handler(proc,
+        (input: any[], ...args: any[]) => {
+            const processed_matcher_expr = input_modifiers.reduce((acc, advice) => {
+                const input_modifier = first(advice)
+                return input_modifier(acc)
+            }, matcher_expr)
+            matchResult = match(input, processed_matcher_expr)
+            if (isSucceed(matchResult)){
+                return true
+            }
+            else{
+                return false
+            }
+        },
+        (input: any[], ...args: any[]) => {
+            if (matchResult !== null){
+                const processed_output = output_modifiers.reduce((acc, advice) => {
+                    const output_modifier = advice
+                    return output_modifier(acc)
+                }, matchResult)
+                return handler(processed_output, ...args)
+            }
+            else{
+                throw new Error("MatchResult is null")
+            }
+        
+    })
 }
 
-class Evaluator{
-    constructor(
-        readonly handler: (...args: any[]) => any,
-        readonly advices: Advice[]
-    ){}
-}
+const test_eval = construct_simple_generic_procedure("test_eval", 2, (...args: any[]) => {
+    return args[0] + args[1]
+})
 
+define_generic_matcher(test_eval, [[P.element, "a"], "b"], (result: MatchResult, other: number) => {
+    console.log(inspect(result))
+    console.log(other)
+})
 
-// const expr_store = new Map<string[], evaluator>()
-
-// function construct_evaluator(store: Map<(...args: any) => any, GenericProcedureMetadata>){
-//     const constructor = (name: string, arity: number, defaultHandler: (expression: MatchResult | MatchPartialSuccess) => any) => {
-//         const metaData = new GenericProcedureMetadata(name, arity, new SimpleDispatchStore(), defaultHandler)
-//         const the_evaluator = (expression: SchemeElement[], ...args: any[]) => {
-//             const result = evaluator_dispatch(metaData, expression)
-//             const matchResult = first(result)
-//             const argHandler = second(result)
-//             return argHandler(matchResult, ...args)
-//         }
-//         if (expr_store !== undefined){
-//             set_store(generic_procedure_store)
-//             set_metaData(the_generic_procedure, metaData)
-//         }
-//         else{
-//             set_metaData(the_generic_procedure, metaData)
-//         }
-//         return the_generic_procedure
-//     }
-//     return constructor
-//     }
-// }
-
-
-// function expr_store_dispatch(data: any[]):  evaluator | null {
-
-
-//     // how to handle expr mismatch?
-//     for (const [expr, handler] of ExprStore.entries()) {
-//             const matchResult = run_matcher(expr_to_matcher(expr), data, (dict, nEaten) => {
-//                 return dict
-//             });
-
-//             if (matchSuccess(matchResult)) {
-//                 // @ts-ignore
-//                 return handler;
-//             }
-
-
-//     }
-//     return null;
-// }
-
-// export function define_expr_handler(expr: any[], callback: evaluator) {
-//     ExprStore.set(expr, callback);
-// }
+test_eval([1, "b"], 2)
