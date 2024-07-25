@@ -18,4 +18,4 @@ export function main(input: string): returnType {
     return evaluate(parsed.value, new Environment(), continuation)
 }
 
-console.log("result", main("((lambda (x) (+ x 1)) 1)"))
+console.log("result", main("((lambda (x y) (+ x y)) 1 2)"))
