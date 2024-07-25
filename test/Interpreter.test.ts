@@ -1,5 +1,4 @@
-// import { evaluate  } from '../Evaluate(deprecated)';
-// import { LNumber, LSymbol,  LBoolean } from '../definition/SchemeElement';
+import { schemeList } from '../definition/SchemeElement';
 import { Environment } from '../definition/Environment';
 import { main } from '../Repl';
 import { schemeSymbol, schemeBoolean, schemeNumber, SchemeElement, SchemeType } from '../definition/SchemeElement';
@@ -9,207 +8,134 @@ describe('Interpreter Tests', () => {
 
   beforeEach(() => {
     env = new Environment();
-    // Setup environment with necessary primitive functions if any
   });
 
   test('evaluate if expression true branch', () => {
-    const expr =  "(if #t 1 2)"
+    const expr = "(if #t 1 2)"
     const result: SchemeElement = main(expr);
-    expect(result.get_type).toBeInstanceOf(SchemeType.number);
-    expect(result.value).toEqual(1);
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(1);
   });
 
-//   test('evaluate if expression false branch', () => {
-//     const expr = [
-//       new LSymbol('if'), 
-//       new LBoolean(false), 
-//       new LNumber(1), 
-//       new LNumber(2)
-//     ];
-//     const result = evaluate(expr, env);
-//     expect(result).toBeInstanceOf(LNumber);
-//     expect(result.value).toEqual(2);
-//   });
+  test('evaluate if expression false branch', () => {
+    const expr = "(if #f 1 2)"
+    const result: SchemeElement = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(2);
+  });
 
-//   test('evaluate define expression', () => {
-//     const expr = [
-//       new LSymbol('define'), 
-//       new LSymbol('x'), 
-//       new LNumber(42)
-//     ];
-//     evaluate(expr, env);
-//     expect((env.lookup('x') as LNumber).value).toEqual(42);
-//   });
+  test('evaluate define variable expression', () => {
+    const expr = "(begin (define x 42) x)"
+    const result = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(42);
+  });
 
-//   test('evaluate lambda expression with one variable', () => {
-//     // Lambda expression that takes one parameter and returns it
-//     const lambdaExpr = [
-//       new LSymbol('lambda'),
-//       [new LSymbol('x')], // Parameter
-//       new LSymbol('x') // Body: return x
-//     ]
+  test('evaluate define function expression', () => {
+    const expr = "(begin (define (f x) (+ x 1)) (f 41))"
+    const result = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(42);
+  });
 
-//     // Call expression that applies the lambda to argument 5
-//     const callExpr = [lambdaExpr, new LNumber(5)];
-//     const result = evaluate(callExpr, env);
-//     expect(result.value).toEqual(5); // Expect the result to be 5
-//   });
+  test('evaluate define function with multiple parameters', () => {
+    const expr = "(begin (define (f x y) (+ x y)) (f 41 1))"
+    const result = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(42);
+  });
 
-//   test('evaluate lambda expression with increment operation', () => {
-//     // Lambda expression that takes one parameter and increments it by 1
-//     const lambdaExpr = [
-//       new LSymbol('lambda'),
-//       [new LSymbol('x')], // Parameter
-//       [new LSymbol('+'), new LSymbol('x'), new LNumber(1)] // Body: x + 1
-//     ];
+  test('evaluate define function with lambda', () => {
+    const expr = "(begin (define f (lambda (y) (+ 1 y))) (f 41))"
+    const result = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(42);
+  });
 
-//     // Call expression that applies the lambda to argument 1
-//     const callExpr =  [lambdaExpr, new LNumber(1)];
-//     const result = evaluate(callExpr, env);
-//     expect(result.value).toEqual(2); // Expect the result to be 1 + 1 = 2
-//   });
-
-//   test('evaluate lambda expression with two variables', () => {
-//     // Lambda expression that takes two parameters and adds them
-//     const lambdaExpr = [
-//       new LSymbol('lambda'),
-//       [new LSymbol('x'), new LSymbol('y')], // Parameters
-//       [new LSymbol('+'), new LSymbol('x'), new LSymbol('y')] // Body: x + y
-//     ];
-
-//     // Call expression that applies the lambda to arguments 5 and 3
-//     const callExpr = [lambdaExpr, new LNumber(5), new LNumber(3)];
-//     const result = evaluate(callExpr, env);
-//     expect(result.value).toEqual(8); // Expect the result of 5 + 3
-//   });
-
-//   test('evaluate lambda expression with three variables', () => {
-//     // Lambda expression that multiplies three parameters
-//     const lambdaMultExpr = [
-//       new LSymbol('lambda'),
-//       [new LSymbol('a'), new LSymbol('b'), new LSymbol('c')], // Parameters
-//       [new LSymbol('*'), new LSymbol('a'), new LSymbol('b'), new LSymbol('c')] // Body: a * b * c
-//     ];
-
-//     // Call expression that applies the lambda to arguments 2, 3, and 4
-//     const callMultExpr = [lambdaMultExpr, new LNumber(2), new LNumber(3), new LNumber(4)];
-//     const resultMult = evaluate(callMultExpr, env);
-//     expect(resultMult.value).toEqual(24); // Expect the result of 2 * 3 * 4
-//   });
-
-//   test('evaluate let expression', () => {
-//     const letExpr = [
-//       new LSymbol('let'), 
-//       [[new LSymbol('x'), new LNumber(5)]], 
-//       [new LSymbol('x')]
-//     ];
-//     const result = evaluate(letExpr, env);
-//     expect(result.value).toEqual(5);
-//   });
-
-//   test('evaluate quotation', () => {
-//     const quoteExpr = [
-//       new LSymbol('quote'), 
-//       new LSymbol('x')
-//     ];
-//     const result = evaluate(quoteExpr, env);
-//     expect(result).toBeInstanceOf(LSymbol);
-//     expect((result as LSymbol).value).toEqual('x');
-//   });
-//   test('evaluate addition with primitive functions', () => {
-//     const addExpr = [
-//       new LSymbol('+'), 
-//       new LNumber(3), 
-//       new LNumber(4)
-//     ];
-//     const result = evaluate(addExpr, env);
-//     expect(result.value).toEqual(7);
-//   });
-
-//   test('evaluate multiplication with primitive functions', () => {
-//     const multExpr = [
-//       new LSymbol('*'), 
-//       new LNumber(5), 
-//       new LNumber(6)
-//     ];
-//     const result = evaluate(multExpr, env);
-//     expect(result.value).toEqual(30);
-//   });
-
-//   test('evaluate subtraction with primitive functions', () => {
-//     const subExpr = [
-//       new LSymbol('-'), 
-//       new LNumber(10), 
-//       new LNumber(4)
-//     ];
-//     const result = evaluate(subExpr, env);
-//     expect(result.value).toEqual(6);
-//   });
-
-//   test('evaluate division with primitive functions', () => {
-//     const divExpr = [
-//       new LSymbol('/'), 
-//       new LNumber(20), 
-//       new LNumber(4)
-//     ];
-//     const result = evaluate(divExpr, env);
-//     expect(result.value).toEqual(5);
-//   });
-
-//   test('evaluate let expression with multiple variables and arithmetic operations', () => {
-//     // Test with addition
-//     const letAddExpr = [
-//       new LSymbol('let'),
-//       [
-//         ([new LSymbol('x'), new LNumber(5)]),
-//         ([new LSymbol('y'), new LNumber(3)])
-//       ],
-//       [new LSymbol('+'), new LSymbol('x'), new LSymbol('y')]
-//     ];
-//     const resultAdd = evaluate(letAddExpr, env);
-//     expect(resultAdd.value).toEqual(8);
-
-//     // Test with subtraction
-//     const letSubExpr = [
-//       new LSymbol('let'),
-//       [
-//         [new LSymbol('x'), new LNumber(10)],
-//         [new LSymbol('y'), new LNumber(4)]
-//       ],
-//       [new LSymbol('-'), new LSymbol('x'), new LSymbol('y')]
-//     ];
-//     const resultSub = evaluate(letSubExpr, env);
-//     expect(resultSub.value).toEqual(6);
-
-//     // Test with multiplication
-//     const letMultExpr = [
-//       new LSymbol('let'),
-//       [
-//         [new LSymbol('x'), new LNumber(7)],
-//         [new LSymbol('y'), new LNumber(6)]
-//       ],
-//       [new LSymbol('*'), new LSymbol('x'), new LSymbol('y')]
-//     ];
-//     const resultMult = evaluate(letMultExpr, env);
-//     expect(resultMult.value).toEqual(42);
-
-//     // Test with division
-//     const letDivExpr = [
-//       new LSymbol('let'),
-//       [
-//         [new LSymbol('x'), new LNumber(20)],
-//         [new LSymbol('y'), new LNumber(4)]
-//       ],
-//       [new LSymbol('/'), new LSymbol('x'), new LSymbol('y')]
-//     ];
-//     const resultDiv = evaluate(letDivExpr, env);
-//     expect(resultDiv.value).toEqual(5);
-//   });
+  test("define a variable and set!", () => {
+    const expr = "(begin (define x 42) (set! x 43) x)"
+    const result = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(43);
+  });
 
 
-// test uncovered, cond, begin set!
+  test('evaluate lambda expression with one variable', () => {
+    const expr = "((lambda (x) x) 5)"
+    const result: SchemeElement = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(5);
+  });
 
+  test('evaluate lambda expression with increment operation', () => {
+    const expr = "((lambda (x) (+ x 1)) 1)"
+    const result: SchemeElement = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(2);
+  });
 
-  // Add more tests for other expressions and error cases
+  test('evaluate lambda expression with two variables', () => {
+    const expr = "((lambda (x y) (+ x y)) 5 3)"
+    const result: SchemeElement = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(8);
+  });
+
+  test('evaluate lambda expression with three variables', () => {
+    const expr = "((lambda (a b c) (* a b c)) 2 3 4)"
+    const result: SchemeElement = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(24);
+  });
+
+  test('evaluate let expression', () => {
+    const expr = "(let ((x 5)) x)"
+    const result: SchemeElement = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(5);
+  });
+
+  test('evaluate quotation', () => {
+    const expr = "(quote x)"
+    const result: SchemeElement = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.symbol);
+    expect(result.get_value()).toEqual('x');
+  });
+
+  test('evaluate addition with primitive functions', () => {
+    const expr = "(+ 3 4)"
+    const result: SchemeElement = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(7);
+  });
+
+  test('evaluate multiplication with primitive functions', () => {
+    const expr = "(* 5 6)"
+    const result: SchemeElement = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(30);
+  });
+
+  test('evaluate subtraction with primitive functions', () => {
+    const expr = "(- 10 4)"
+    const result: SchemeElement = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(6);
+  });
+
+  test('evaluate division with primitive functions', () => {
+    const expr = "(/ 20 4)"
+    const result: SchemeElement = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(5);
+  });
+
+  test('evaluate let expression with multiple variables and arithmetic operations', () => {
+    const expr = "(let ((x 5) (y 3)) (+ x y))"
+    const result: SchemeElement = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(8);
+  });
+
+  // Additional tests for cond, begin, and set! can be added here
 });
-

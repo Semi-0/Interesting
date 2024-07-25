@@ -132,7 +132,7 @@ define_generic_procedure_handler(
     }
 )
 
-export const set = construct_simple_generic_procedure("set", 3, (key: string, value: SchemeElement, env: any) => { throw Error("no arg match for set") });
+export const set = construct_simple_generic_procedure("set", 3, (key: string, value: SchemeElement, env: any) => { throw Error("no arg match for set, key: " + key + " value: " + value + " env: " + env) });
 
 define_generic_procedure_handler(
     set,
@@ -145,9 +145,9 @@ define_generic_procedure_handler(
 
 define_generic_procedure_handler(
     set,
-    match_args(is_scheme_symbol, is_scheme_element, is_packages),
-    (key: SchemeElement, value: SchemeElement, packages: Package[]) => {
-        return set(key.get_value(), value, packages)
+    match_args(is_scheme_symbol, is_scheme_element, is_environment),
+    (key: SchemeElement, value: SchemeElement, env: Environment) => {
+        return set(key.get_value(), value, env)
     }
 )
 

@@ -200,7 +200,7 @@ function let_to_combination(names: SchemeElement[], values: SchemeElement[], bod
     return make_application(make_lambda(names, body), values)
 }
 
-const assignment_expr = ["set!", [P.element, "name"], [P.element, "value"]]
+const assignment_expr = ["set!", [P.element, "name", is_scheme_symbol], [P.element, "value"]]
 
 define_generic_matcher(evaluate, assignment_expr, ((exec, env, continuation): EvalHandler => {
     return exec((name: SchemeElement, value: SchemeElement) => {
@@ -209,15 +209,16 @@ define_generic_matcher(evaluate, assignment_expr, ((exec, env, continuation): Ev
 }) as EvalHandler);
 
 
-const define_expr =  [P.new, ["parameters"], 
+export const define_expr =  [P.new, ["parameters"], 
                                 [P.choose,
-                                    ["define", [[P.element, "name"], [P.segment, "parameters"]], [P.segment, "body"]],
-                                    ["define", [P.element, "name"], [P.element, "body"]],
+                                    ["define", [[P.element, "name", is_scheme_symbol], [P.segment, "parameters"]], [P.segment, "body"]],
+                                    ["define", [P.element, "name", is_scheme_symbol], [P.segment, "body"]],
                                     ]]
 define_generic_matcher(evaluate, define_expr, ((exec, env, continuation): EvalHandler => {
     return exec((name: SchemeElement, parameters: SchemeElement[] | string, body: SchemeElement[]) => {
+        console.log("define",'name', name, 'parameters', parameters, 'body', body)
         if (parameters === will_define){
-
+           
             return extend_def(name, continuation(seq_to_begin(body), env), env)
         }
         else{
