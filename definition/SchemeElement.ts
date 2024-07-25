@@ -9,21 +9,20 @@ import { match_args } from 'generic-handler/Predicates';
 import { isNumber, isString } from 'effect/Predicate';
 import { match, P } from 'pmatcher/MatchBuilder';
 export enum SchemeType{
-    String = "String",
-    Number = "Number",
-    Boolean = "Boolean",
-    Symbol = "Symbol",
-    Quoted = "Quoted",
-    List = "List",
-    Expression = "Expression",
-    Lambda = "Lambda",
-    Let = "Let",
-    Call = "Call",
-    PrimitiveCall = "PrimitiveCall",
-    Closure = "Closure",
-    PrimitiveFunc = "PrimitiveFunc",
-    Unknown = "Unknown",
-    Feedback = "Feedback"
+    string = "String",
+    number = "Number",
+    boolean = "Boolean",
+    symbol = "Symbol",
+    quoted = "Quoted",
+    list = "List",
+    expression = "Expression",
+    lambda = "Lambda",
+    let = "Let",
+    call = "Call",
+    closure = "Closure",
+    primitiveFunc = "PrimitiveFunc",
+    unknown = "Unknown",
+    feedback = "Feedback"
 }
 
 
@@ -39,7 +38,7 @@ export class SchemeElement{
     }
 
     toString(){
-        if (this.type === SchemeType.List){
+        if (this.type === SchemeType.list){
             return `(${this.value.map((e: SchemeElement) => e.toString()).join(' ')})`
         }
         return `${this.value}: ${this.type}`
@@ -79,7 +78,7 @@ define_generic_procedure_handler(map_procedure,
     match_args(isSchemeElement, (proc: (value: any) => any) => true),
     (element: SchemeElement, proc: (value: any) => any) => {
         const v = proc(element.get_value())
-        const type = mapTypeIntoSchemeType(v)
+        const type = mapTypeIntoSchemeType(typeof v)
         return new SchemeElement(v, type)
     }
 )
@@ -88,17 +87,17 @@ export function mapTypeIntoSchemeType(type: string): SchemeType{
     
     const t = SchemeType[type as keyof typeof SchemeType]
     if (t === undefined){
-        return SchemeType.Unknown
+        return SchemeType.unknown
     }
     return t
 }
 
 export function construct_scheme_element_from_value(value: any): SchemeElement{
-    return new SchemeElement(value, SchemeType.String)
+    return new SchemeElement(value, SchemeType.string)
 }
 
 export function is_self_evaluating(value: SchemeElement): boolean{
-    return is_scheme_symbol(value) || is_scheme_number(value) || is_scheme_boolean(value)
+    return  is_scheme_symbol(value) || is_scheme_number(value) || is_scheme_boolean(value)
 }
 
 export function isSchemeElement(value: any): value is SchemeElement{
@@ -106,28 +105,28 @@ export function isSchemeElement(value: any): value is SchemeElement{
 }
 
 export function schemeStr(value: string): SchemeElement{
-    return new SchemeElement(value, SchemeType.String)
+    return new SchemeElement(value, SchemeType.string)
 }
 
 export function isSchemeStr(value: SchemeElement): boolean{
 
-    return is_scheme_element(value) && value.is_type(SchemeType.String)
+    return is_scheme_element(value) && value.is_type(SchemeType.string)
 }
 
 export function schemeNumber(value: number): SchemeElement{
-    return new SchemeElement(value, SchemeType.Number)
+    return new SchemeElement(value, SchemeType.number)
 }
 
 export function is_scheme_number(value: SchemeElement): boolean{
-    return is_scheme_element(value) && value.is_type(SchemeType.Number)
+    return is_scheme_element(value) && value.is_type(SchemeType.number)
 }
 
 export function schemeBoolean(value: boolean): SchemeElement{
-    return new SchemeElement(value, SchemeType.Boolean)
+    return new SchemeElement(value, SchemeType.boolean)
 }
 
 export function is_scheme_boolean(value: SchemeElement): boolean{
-    return is_scheme_element(value) && value.is_type(SchemeType.Boolean)
+    return is_scheme_element(value) && value.is_type(SchemeType.boolean)
 }
 
 
@@ -140,28 +139,31 @@ export function is_false(value: SchemeElement): boolean{
 }
 
 export function is_scheme_symbol(value: SchemeElement): boolean{
-    return is_scheme_element(value) && value.is_type(SchemeType.Symbol)
+    return is_scheme_element(value) && value.is_type(SchemeType.symbol)
 }
 
 export function schemeSymbol(value: string): SchemeElement{
-    return new SchemeElement(value, SchemeType.Symbol)
+    return new SchemeElement(value, SchemeType.symbol)
 }
 
 export function schemeList(value: SchemeElement[]): SchemeElement{
-    return new SchemeElement(value, SchemeType.List)
+    return new SchemeElement(value, SchemeType.list)
 }
 
 export function isSchemeArray(value: SchemeElement): boolean{
-        return is_scheme_element(value) && value.is_type(SchemeType.List)
+        return is_scheme_element(value) && value.is_type(SchemeType.list)
 }
 
 export function construct_primitive_procedure(func: Function): SchemeElement{
-    return new SchemeElement(func, SchemeType.PrimitiveFunc)
+    return new SchemeElement(func, SchemeType.primitiveFunc)
 }
 
+export function schemeClosure(parameters: SchemeElement[], body: SchemeElement, environment: Environment): SchemeElement{
+    return new SchemeElement(new Closure(parameters, body, environment), SchemeType.closure)
+}
 
 export function construct_feedback(msg: string): SchemeElement{
-    return new SchemeElement(msg, SchemeType.Feedback)
+    return new SchemeElement(msg, SchemeType.feedback)
 }
 // adaptor for generic_array
 
@@ -200,10 +202,12 @@ define_generic_procedure_handler(isArray,
 
 
 import { equal } from 'pmatcher/utility'; 
+import { Closure } from './Closure';
+import type { Environment } from './Environment';
 
 
 define_generic_procedure_handler(equal,
-    match_args(isSchemeStr, isString),
+    match_args(is_scheme_symbol , isString),
     (a: SchemeElement , b: string) => {
         return a.get_value() === b
     }

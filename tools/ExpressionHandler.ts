@@ -21,6 +21,7 @@ export function matcher_advice() : any[]{
                              (expr: any[]) => { 
                                 return (input: any[], ...args: any[]) => {
                                     matchResult = match(input, expr)
+                             
                                     return isSucceed(matchResult)
                                 }
                               },
@@ -47,6 +48,6 @@ export function log_advice(){
 
 export const define_generic_matcher = install_advice(matcher_advice(), define_generic_procedure_handler)
 
-
+export const define_logged_generic_matcher = install_advice(log_advice(), define_generic_matcher)
 
 

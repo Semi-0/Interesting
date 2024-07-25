@@ -1,15 +1,21 @@
 import {parseExpr} from "./Parser"
 import {parse, State} from "parse-combinator"
-import {evaluate} from "./Evaluate(deprecated)"
+import { evaluate } from "./Evaluator"
 import { Environment } from "./definition/Environment"
-import { unwrapLispElement } from "./definition/SchemeElement"
-
+import { SchemeElement } from "./definition/SchemeElement"
+import { inspect } from "bun"
 
 type returnType = [any, Environment]
 
-export function main(input: string, environment: Environment): returnType {
-    const parsed = parse(parseExpr, new State(input))
-    return [unwrapLispElement(evaluate(parsed.value, environment)), environment]
+function continuation(exp: SchemeElement, env: Environment): returnType {
+    // console.log("continuation", exp.toString())
+    return evaluate(exp, env, continuation)
 }
 
-console.log(main("(+ 1 3 2)", new Environment()))
+export function main(input: string): returnType {
+    const parsed = parse(parseExpr, new State(input))
+    // console.log(parsed.value)
+    return evaluate(parsed.value, new Environment(), continuation)
+}
+
+console.log("result", main("((lambda (x) (+ x 1)) 1)"))

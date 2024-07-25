@@ -72,7 +72,7 @@ describe('REPL Functionality', () => {
     // ... existing tests ...
 
     test('matches SchemeElement with pattern', () => {
-        const test_array = new SchemeElement(["1", "2", "3"], SchemeType.List);
+        const test_array = new SchemeElement([schemeNumber(1), schemeSymbol("2"), schemeSymbol("3")], SchemeType.list);
         const test_result = match(test_array, [[P.element, "a"], "2", "3"]);
         console.log(inspect(test_result, { showHidden: true, depth: 20 }));
 
@@ -83,19 +83,14 @@ describe('REPL Functionality', () => {
         expect(test_result._dictionary.dict.size).toBe(1);
         expect(test_result._dictionary.dict.get('a')).toBeDefined();
         expect(test_result._dictionary.dict.get('a').referenced_definition).toBeInstanceOf(Map);
-        expect(test_result._dictionary.dict.get('a').referenced_definition.get(0)).toBe('1');
+        expect(test_result._dictionary.dict.get('a').referenced_definition.get(0).value).toBe(1);
         expect(test_result._nEaten).toBe(1);
-        expect(test_result.dictionary).toBeDefined();
-        expect(test_result.dictionary.dict).toBeInstanceOf(Map);
-        expect(test_result.dictionary.dict.size).toBe(1);
-        expect(test_result.dictionary.dict.get('a')).toBeDefined();
-        expect(test_result.dictionary.dict.get('a').referenced_definition).toBeInstanceOf(Map);
-        expect(test_result.dictionary.dict.get('a').referenced_definition.get(0)).toBe('1');
-        expect(test_result.nEaten).toBe(1);
+       
+    
     });
 
     test('matches SchemeElement with simple pattern', () => {
-      const test_array = new SchemeElement([schemeStr("a")], SchemeType.List);
+      const test_array = new SchemeElement([schemeSymbol("a")], SchemeType.list);
       const test_result = match(test_array, ["a"]);
       console.log(inspect(test_result, { showHidden: true, depth: 20 }));
 

@@ -1,9 +1,9 @@
 import { construct_feedback, is_scheme_element, is_scheme_symbol, map_procedure, type SchemeElement  } from "./SchemeElement"
 import { Closure } from "./Closure"
-import {  is_package, make_primitive_package } from "./PrimitiveFunction"
+import {  is_package, make_primitive_package } from "./PackageSystem"
 import { inspect } from "util"
 import { construct_simple_generic_procedure, define_generic_procedure_handler } from "generic-handler/GenericProcedure"
-import type{ PrimitiveFunction } from "./PrimitiveFunction"
+import type{ PrimitiveFunction } from "./PackageSystem"
 import { match_args } from "generic-handler/Predicates"
 import { isString } from "effect/Predicate"
 import { isArray } from "effect/Array"
@@ -13,7 +13,7 @@ import { zip } from "effect/Array"
 
 // TODO: CHANGE TO LEXICIAL SCOPING
 
-import type { Package } from "./PrimitiveFunction"
+import type { Package } from "./PackageSystem"
 export class Environment{
     dict: {[key: string]: SchemeElement} = {}
     loaded_packages: Package[] = [make_primitive_package()]
@@ -96,7 +96,7 @@ define_generic_procedure_handler(
     }
 );
 
-export const extend = construct_simple_generic_procedure("extend", 3, (key: string, value: SchemeElement, env: any) => { throw Error("no arg match for extend") });
+export const extend = construct_simple_generic_procedure("extend", 3, (key: string, value: SchemeElement, env: any) => { throw Error("no arg match for extend" + key + " " + value + " " + env) });
 
 define_generic_procedure_handler(
     extend,
@@ -112,9 +112,9 @@ define_generic_procedure_handler(
 
 define_generic_procedure_handler(
     extend,
-    match_args(is_scheme_symbol, is_scheme_element, is_packages),
-    (key: SchemeElement, value: SchemeElement, packages: Package[]) => {
-        return extend(key.get_value(), value, packages)
+    match_args(is_scheme_symbol, is_scheme_element, is_environment),
+    (key: SchemeElement, value: SchemeElement, env: Environment) => {
+        return extend(key.get_value(), value, env)
     }
 )
 
