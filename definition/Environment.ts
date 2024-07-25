@@ -155,7 +155,7 @@ export function is_environment(probablyEnv: any): boolean{
    return probablyEnv instanceof Environment
 }
 
-export const extend_def = construct_simple_generic_procedure("define", 2, (key: string, value: SchemeElement) => { throw Error("no arg match for define") });
+export const extend_def = construct_simple_generic_procedure("define", 2, (key: string, value: SchemeElement) => { throw Error("no arg match for define, key: " + key + "value: " + inspect(value)) });
 
 define_generic_procedure_handler(
     extend_def,
@@ -163,14 +163,14 @@ define_generic_procedure_handler(
     (key: string, value: SchemeElement, env: Environment) => {
         // temporary, TODO: check whether in current scope value has already been defined 
         set(key, value, env)
-        return construct_feedback(key + " defined" + " with " + value)
+        return construct_feedback(key + " defined" + " with " + inspect(value))
     }
 );
 
 define_generic_procedure_handler(
     extend_def,
-    match_args(is_scheme_symbol, is_scheme_element, is_packages),
-    (key: SchemeElement, value: SchemeElement, packages: Package[]) => {
-        return extend_def(key.get_value(), value, packages)
+    match_args(is_scheme_symbol, is_scheme_element, is_environment),
+    (key: SchemeElement, value: SchemeElement, env: Environment) => {
+        return extend_def(key.get_value(), value, env)
     }
 )

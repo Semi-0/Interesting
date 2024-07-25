@@ -15,7 +15,7 @@ import { isEmpty as is_empty, get_length, isPair as is_pair } from "pmatcher/Gen
 import { set } from "./definition/Environment"
 import { will_define } from "pmatcher/MatchDict/DictValue"
 import { inspect } from "bun"
-
+// TODO: Support Currying
 type EvalHandler = (exec: (...args: any[]) => any, env: Environment, continuation: (result: SchemeElement, env: Environment) => SchemeElement) => any;
 
 export const evaluate = construct_simple_generic_procedure("evaluate", 3, (expr, env, continuation) => {
@@ -114,6 +114,7 @@ define_logged_generic_matcher(evaluate, lambda_expr, ((exec, env, continuation):
 }) as EvalHandler)
 
 function make_lambda(parameters: SchemeElement[], body: SchemeElement[]): SchemeElement{
+    console.log("mk lambda", body)
     return schemeList([schemeSymbol("lambda"), schemeList(parameters), seq_to_begin(body)])
 }
 
@@ -127,6 +128,7 @@ function seq_to_begin(seq: SchemeElement[]): SchemeElement{
         return first(seq)
     }
     else{
+        console.log(seq)
         return schemeList([schemeSymbol("begin"), ...seq])
     }
 }
@@ -159,6 +161,7 @@ const cond_expr = ["cond", [[P.many, [[P.element, "predicates"], [P.element, "co
 define_generic_matcher(evaluate, cond_expr, 
     ((exec, env, continuation): EvalHandler => {
     return exec((predicates: SchemeElement[], consequents: SchemeElement[]) => {
+        console.log("cond", predicates, consequents)
         return continuation(cond_to_if(predicates, consequents), env)
     });
 }) as EvalHandler)
@@ -169,11 +172,11 @@ function cond_to_if(predicates: SchemeElement[], consequents: SchemeElement[]): 
             throw Error("empty predicates in cond_to_if")
         }
         else if (get_length(predicates) === 1){
-            if (first(predicates) == schemeSymbol("else")){
+            if (first(predicates).value === schemeSymbol("else").value){
                 return first(consequents)
             }
             else{
-                throw Error("no else in cond_to_if")
+                throw Error("no else in cond_to_if, " + first(predicates).toString())
             }
         }
         else{
@@ -188,6 +191,7 @@ const let_expr = ["let", [[P.many, [[P.element, "names"], [P.element, "values"]]
 
 define_generic_matcher(evaluate, let_expr, ((exec, env, continuation): EvalHandler => {
     return exec((names: SchemeElement[], values: SchemeElement[], body: SchemeElement[]) => {
+        console.log("let", names, values, body)
         return continuation(let_to_combination(names, values, body), env);
     });
 }) as EvalHandler);
@@ -207,16 +211,18 @@ define_generic_matcher(evaluate, assignment_expr, ((exec, env, continuation): Ev
 
 const define_expr =  [P.new, ["parameters"], 
                                 [P.choose,
+                                    ["define", [[P.element, "name"], [P.segment, "parameters"]], [P.segment, "body"]],
                                     ["define", [P.element, "name"], [P.element, "body"]],
-                                    ["define", [[P.element, "name"], [P.segment, "parameters"]], [P.segment, "body"]]]]
+                                    ]]
 define_generic_matcher(evaluate, define_expr, ((exec, env, continuation): EvalHandler => {
     return exec((name: SchemeElement, parameters: SchemeElement[] | string, body: SchemeElement[]) => {
         if (parameters === will_define){
+
             return extend_def(name, continuation(seq_to_begin(body), env), env)
         }
         else{
             // @ts-ignore
-            return extend_def(name, make_lambda(parameters, body), env)
+            return extend_def(name, continuation(make_lambda(parameters, body), env), env)
         }
     });
 }) as EvalHandler);
