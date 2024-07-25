@@ -31,6 +31,14 @@ export class Environment{
     unload(pkg: Package): void {
         this.loaded_packages = this.loaded_packages.filter(p => p !== pkg)
     }
+
+    has(key: string): boolean {
+        return this.dict[key] !== undefined
+    }
+
+    not_has(key: string): boolean {
+        return this.dict[key] === undefined
+    }
 }
 
 
@@ -103,9 +111,15 @@ define_generic_procedure_handler(
     match_args(isString, is_scheme_element, is_environment),
 
     (key: string, value: SchemeElement, env: Environment) => {
-        var c = env.copy()
-        set(key, value, c)
-        return c;
+        if (env.not_has(key)){
+            var c = env.copy()
+            c.dict[key] = value
+            return c;
+        }
+        else {
+
+            throw Error("key " + key + " already exists in environment")
+        }
     }
 );
 
@@ -138,8 +152,13 @@ define_generic_procedure_handler(
     set,
     match_args(isString, is_scheme_element, is_environment),
     (key: string, value: SchemeElement, env: Environment) => {
-        env.dict[key] = value;
-        return construct_feedback(key + " set to " + value)
+        if (env.has(key)){
+            env.dict[key] = value;
+            return construct_feedback(key + " set to " + value)
+        }
+        else {
+            throw Error("key " + key + " does not exist in environment")
+        }
     }
 );
 
@@ -155,22 +174,24 @@ export function is_environment(probablyEnv: any): boolean{
    return probablyEnv instanceof Environment
 }
 
-export const extend_def = construct_simple_generic_procedure("define", 2, (key: string, value: SchemeElement) => { throw Error("no arg match for define, key: " + key + "value: " + inspect(value)) });
+export const define = construct_simple_generic_procedure("define", 2, (key: string, value: SchemeElement) => { throw Error("no arg match for define, key: " + key + "value: " + inspect(value)) });
 
 define_generic_procedure_handler(
-    extend_def,
+    define,
     match_args(isString, is_scheme_element, is_environment),
     (key: string, value: SchemeElement, env: Environment) => {
-        // temporary, TODO: check whether in current scope value has already been defined 
-        set(key, value, env)
+        if (env.has(key)){
+            throw Error("key " + key + " already exists in environment")
+        }
+        env.dict[key] = value;
         return construct_feedback(key + " defined" + " with " + inspect(value))
     }
 );
 
 define_generic_procedure_handler(
-    extend_def,
+    define,
     match_args(is_scheme_symbol, is_scheme_element, is_environment),
     (key: SchemeElement, value: SchemeElement, env: Environment) => {
-        return extend_def(key.get_value(), value, env)
+        return define(key.get_value(), value, env)
     }
 )

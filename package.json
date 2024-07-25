@@ -17,6 +17,7 @@
     "parse-combinator": "^1.0.1",
     "pmatcher": "0.3.9",
     "runtypes": "^6.7.0",
+    "set-operations": "^2.0.2",
     "ts-array-extensions": "^2.2.3",
     "ts-jest": "^29.2.2",
     "ts-pattern": "^5.2.0"

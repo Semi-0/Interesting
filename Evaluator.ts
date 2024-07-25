@@ -1,7 +1,7 @@
 import { construct_simple_generic_procedure } from "generic-handler/GenericProcedure"
 import { SchemeType,  SchemeElement, is_self_evaluating, schemeSymbol, is_true, schemeNumber, schemeClosure } from "./definition/SchemeElement"
 import { define_generic_matcher, define_logged_generic_matcher } from "./tools/ExpressionHandler"
-import { extend_def, lookup, type Environment } from "./definition/Environment"
+import { define, lookup, type Environment } from "./definition/Environment"
 import {P, match} from "pmatcher/MatchBuilder"
 import { isSucceed } from "pmatcher/Predicates"
 import { apply as apply_matched} from "pmatcher/MatchResult/MatchGenericProcs"
@@ -219,11 +219,11 @@ define_generic_matcher(evaluate, define_expr, ((exec, env, continuation): EvalHa
         console.log("define",'name', name, 'parameters', parameters, 'body', body)
         if (parameters === will_define){
            
-            return extend_def(name, continuation(seq_to_begin(body), env), env)
+            return define(name, continuation(seq_to_begin(body), env), env)
         }
         else{
             // @ts-ignore
-            return extend_def(name, continuation(make_lambda(parameters, body), env), env)
+            return define(name, continuation(make_lambda(parameters, body), env), env)
         }
     });
 }) as EvalHandler);
