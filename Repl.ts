@@ -7,12 +7,12 @@ import { inspect } from "bun"
 
 type returnType = [any, Environment]
 
-function continuation(exp: SchemeElement, env: Environment): returnType {
+function continuation(exp: SchemeElement, env: Environment): SchemeElement {
     console.log("continuation", exp.toString(), inspect(env))
     return evaluate(exp, env, continuation)
 }
 
-export function main(input: string): returnType {
+export function main(input: string): SchemeElement {
     const parsed = parse(parseExpr, new State(input))
     console.log("parsed", parsed.value?.toString())
     return evaluate(parsed.value, new Environment(), continuation)

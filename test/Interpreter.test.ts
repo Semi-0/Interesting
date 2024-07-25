@@ -1,26 +1,23 @@
 // import { evaluate  } from '../Evaluate(deprecated)';
 // import { LNumber, LSymbol,  LBoolean } from '../definition/SchemeElement';
-// import { Environment } from '../definition/Environment';
+import { Environment } from '../definition/Environment';
+import { main } from '../Repl';
+import { schemeSymbol, schemeBoolean, schemeNumber, SchemeElement, SchemeType } from '../definition/SchemeElement';
 
-// describe('Interpreter Tests', () => {
-//   let env: Environment;
+describe('Interpreter Tests', () => {
+  let env: Environment;
 
-//   beforeEach(() => {
-//     env = new Environment();
-//     // Setup environment with necessary primitive functions if any
-//   });
+  beforeEach(() => {
+    env = new Environment();
+    // Setup environment with necessary primitive functions if any
+  });
 
-//   test('evaluate if expression true branch', () => {
-//     const expr =  [
-//       new LSymbol('if'), 
-//       new LBoolean(true), 
-//       new LNumber(1), 
-//       new LNumber(2)
-//     ];
-//     const result = evaluate(expr, env);
-//     expect(result).toBeInstanceOf(LNumber);
-//     expect(result.value).toEqual(1);
-//   });
+  test('evaluate if expression true branch', () => {
+    const expr =  "(if #t 1 2)"
+    const result: SchemeElement = main(expr);
+    expect(result.get_type).toBeInstanceOf(SchemeType.number);
+    expect(result.value).toEqual(1);
+  });
 
 //   test('evaluate if expression false branch', () => {
 //     const expr = [
@@ -210,9 +207,9 @@
 //   });
 
 
-// // test uncovered, cond, begin set!
+// test uncovered, cond, begin set!
 
 
-//   // Add more tests for other expressions and error cases
-// });
+  // Add more tests for other expressions and error cases
+});
 
