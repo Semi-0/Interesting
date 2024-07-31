@@ -114,7 +114,7 @@ define_logged_generic_matcher(evaluate, lambda_expr, ((exec, env, continuation):
 }) as EvalHandler)
 
 function make_lambda(parameters: SchemeElement[], body: SchemeElement[]): SchemeElement{
-    console.log("mk lambda", body)
+
     return schemeList([schemeSymbol("lambda"), schemeList(parameters), seq_to_begin(body)])
 }
 
