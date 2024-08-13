@@ -19,6 +19,7 @@
     "pmatcher": "0.3.9",
     "ramda": "^0.30.1",
     "runtypes": "^6.7.0",
+    "rxjs": "^7.8.1",
     "set-operations": "^2.0.2",
     "ts-array-extensions": "^2.2.3",
     "ts-jest": "^29.2.2",
