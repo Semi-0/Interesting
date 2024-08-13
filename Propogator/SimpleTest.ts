@@ -8,6 +8,7 @@ import { get_all_cells } from "./PublicState";
 import { combineLatestAll, of, type BehaviorSubject, type Observable, map, combineLatest, Subscription, tap } from "rxjs";
 
 const p_multiply =  primitive_propagator((...inputs: any[]) => {
+    console.log("multiple inputs", inputs);
     const result = inputs.reduce((acc, curr) => acc * curr, 1);
    inputs.forEach(input => {
     if (isNumber(input)) {
@@ -46,20 +47,20 @@ const y = new Cell("y");
 const product = new Cell("product");
 
 combineLatest([x.getStrongest(), y.getStrongest(), product.getStrongest()]).pipe(
-    // tap(values => console.log("values", values))
+    tap(values => console.log("values", values))
 ).subscribe();
 
 x.getStrongest().subscribe(value => console.log("x update", value));
-// y.getStrongest().subscribe(value => console.log("y update", value));
-// product.getStrongest().subscribe(value => console.log("product update", value));
+
 
 c_multiply(x, y, product);
 
 tell(x, 3);
 get_all_cells().forEach(cell => console.log(cell.summarize()));
 
-// tell(y, 4);
-// get_all_cells().forEach(cell => console.log(cell.summarize()));
+tell(product, 21);
+get_all_cells().forEach(cell => console.log(cell.summarize()));
+
 
 // console.log(x.summarize());
 // console.log(y.summarize());

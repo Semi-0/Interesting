@@ -9,7 +9,9 @@ import { Relation, make_relation } from "./Relation";
 import { inspect } from "bun";
 
 const cell_merge = construct_simple_generic_procedure("cell_merge", 2, (a, b) => {
-  if (is_nothing(a)) {
+  console.log("a", a);
+  console.log("b", b);
+if (is_nothing(a) && !isNaN(b)) {
     return b;
   }
   else if (is_nothing(b)) {

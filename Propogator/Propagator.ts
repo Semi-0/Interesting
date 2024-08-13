@@ -50,12 +50,13 @@ export function primitive_propagator(f: (...inputs: any[]) => any, name: string)
             // @ts-ignore
             return right(new Propagator(name, inputs, [output], () => {
                 combineLatest(inputs_pub).pipe(
-                    map(f),
-                    tap(result => {
+                    map(values => {
+                        console.log("values in map", values);
+                        return f(...values);
+                    }),
 
-                        // console.log("get update in primitive propagator", result);
-                        return result
-                    })
+                    
+                    
                 ).subscribe(result => {
                     add_cell_content(output, result);
                 });
