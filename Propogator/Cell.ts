@@ -10,34 +10,6 @@ import { inspect } from "bun";
 import { is_nothing, the_nothing, is_contradiction, the_contradiction } from "./CellValue";
 import { merge } from "./Merge"
 
-
-
-// const cell_merge = construct_simple_generic_procedure("cell_merge", 2, (a, b) => {
-
-
-// if (is_nothing(a) && !isNaN(b)) {
-//     return b;
-//   }
-//   else if (is_nothing(b)) {
-//     return a;
-//   }
-//   else if (a === b){
-//     return a;
-//   }
-//   else if (isArray(a)){
-//     return a.concat(b);
-//   }
-//   else if (isArray(b)){
-//     return [a].concat(b);
-//   }
-//   else if (isNaN(b)){
-//     return a;
-//   }
-//   else {
-//     return [a, b];
-//   }
-// });
-
 export const cell_merge = merge;
 
 export const strongest_value = construct_simple_generic_procedure("strongest_value", 1, (a: any[]) => {
