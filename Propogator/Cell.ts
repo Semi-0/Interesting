@@ -1,40 +1,46 @@
-import {  public_state, the_nothing, PublicState, is_nothing, add_global_cell, add_global_child, get_global_parent } from "./PublicState";
+import {  public_state,  PublicState,  add_global_cell, add_global_child, get_global_parent } from "./PublicState";
 import { Propagator } from "./Propagator";
-import { BehaviorSubject, pipe } from "rxjs";
+import { BehaviorSubject,  pipe } from "rxjs";
 import { construct_simple_generic_procedure } from "generic-handler/GenericProcedure";
 import { isArray } from "effect/Array";
 import { construct } from "pmatcher/GenericArray";
 import { filter, map } from "rxjs/operators";
 import { Relation, make_relation } from "./Relation";
 import { inspect } from "bun";
+import { is_nothing, the_nothing, is_contradiction, the_contradiction } from "./CellValue";
+import { merge } from "./Merge"
 
-const cell_merge = construct_simple_generic_procedure("cell_merge", 2, (a, b) => {
-  console.log("a", a);
-  console.log("b", b);
-if (is_nothing(a) && !isNaN(b)) {
-    return b;
-  }
-  else if (is_nothing(b)) {
-    return a;
-  }
-  else if (a === b){
-    return a;
-  }
-  else if (isArray(a)){
-    return a.concat(b);
-  }
-  else if (isArray(b)){
-    return [a].concat(b);
-  }
-  else if (isNaN(b)){
-    return a;
-  }
-  else {
-    return [a, b];
-  }
-});
 
-const strongest_value = construct_simple_generic_procedure("strongest_value", 1, (a: any[]) => {
+
+// const cell_merge = construct_simple_generic_procedure("cell_merge", 2, (a, b) => {
+
+
+// if (is_nothing(a) && !isNaN(b)) {
+//     return b;
+//   }
+//   else if (is_nothing(b)) {
+//     return a;
+//   }
+//   else if (a === b){
+//     return a;
+//   }
+//   else if (isArray(a)){
+//     return a.concat(b);
+//   }
+//   else if (isArray(b)){
+//     return [a].concat(b);
+//   }
+//   else if (isNaN(b)){
+//     return a;
+//   }
+//   else {
+//     return [a, b];
+//   }
+// });
+
+export const cell_merge = merge;
+
+export const strongest_value = construct_simple_generic_procedure("strongest_value", 1, (a: any[]) => {
   if (isArray(a) && a.length > 0) {
     return a[a.length - 1];
   }
@@ -47,20 +53,20 @@ const strongest_value = construct_simple_generic_procedure("strongest_value", 1,
   }
 })
 
-const general_contradiction = construct_simple_generic_procedure("general_contradiction", 1, (a: any) => {
+export const general_contradiction = construct_simple_generic_procedure("general_contradiction", 1, (a: any) => {
   return false;
 })
 
-const handle_contradiction = construct_simple_generic_procedure("handle_contradiction", 1, (a: any) => {
+export const handle_contradiction = construct_simple_generic_procedure("handle_contradiction", 1, (a: any) => {
   return null;
 })
 
-const compactMap = <T, R>(fn: (value: T) => R) => pipe(
+export const compactMap = <T, R>(fn: (value: T) => R) => pipe(
   map(fn),
   filter(value => value !== null && value !== undefined)
 );
 
-class Cell{
+export class Cell{
   private relation : Relation 
   private neighbors : Map<string, Propagator> = new Map();
   private content : BehaviorSubject<any> = new BehaviorSubject<any>(the_nothing);
@@ -71,10 +77,9 @@ class Cell{
 
     this.content
         .pipe(
-          compactMap(content => this.testContent(content))
+          compactMap(content => this.testContent(content, this.strongest.getValue()))
         )
         .subscribe(content => {
-          console.log("content in strongest", content);
           this.strongest.next(content);
         });
 
@@ -102,10 +107,10 @@ class Cell{
     this.content.next(cell_merge(this.content.getValue(), increment));
   }
 
-  testContent(content: any): any | null {
-    console.log("test content", content);
+  testContent(content: any, strongest: any): any | null {
+
     const _strongest = strongest_value(content);
-    if (_strongest === this.strongest.getValue()){
+    if (_strongest === strongest){
       return null;
     }
     else if (general_contradiction(_strongest)){
@@ -115,6 +120,10 @@ class Cell{
     else {
       return _strongest
     }
+  }
+
+  force_update(){
+    this.content.next(this.content.getValue());
   }
 
   addNeighbor(propagator: Propagator){
@@ -129,20 +138,23 @@ class Cell{
   }
 }
 
+export function test_cell_content(cell: Cell){
+  return cell.force_update();
+}
 
-function add_cell_neighbour(cell: Cell, propagator: Propagator){
+export function add_cell_neighbour(cell: Cell, propagator: Propagator){
   cell.addNeighbor(propagator);
 }
 
-function add_cell_content(cell: Cell, content: any){
+export function add_cell_content(cell: Cell, content: any){
   cell.addContent(content);
 }
 
-function cell_strongest(cell: Cell){
+export function cell_strongest(cell: Cell){
   return cell.getStrongest();
 }
 
-function cell_id(cell: Cell){
+export function cell_id(cell: Cell){
   if (cell === undefined){
     console.log("cell is undefined");
     return "undefined";
@@ -150,5 +162,3 @@ function cell_id(cell: Cell){
 
   return cell.getRelation().getID();
 }
-
-export { Cell, cell_merge, strongest_value, general_contradiction, handle_contradiction, add_cell_neighbour, add_cell_content, cell_strongest, cell_id };

@@ -14,7 +14,7 @@ export class Propagator{
             outputs: Cell[], 
             activate: () => void){
 
-    this.relation = make_relation(name, get_global_parent());
+    this.relation = get_global_parent();
     add_global_child(this.relation);
 
     this.inputs_ids = inputs.map(cell => cell_id(cell));
@@ -45,18 +45,12 @@ export function primitive_propagator(f: (...inputs: any[]) => any, name: string)
             const inputs = cells.slice(0, -1);
             const inputs_pub = inputs.map(cell => cell_strongest(cell).asObservable());
             
-
-            
             // @ts-ignore
             return right(new Propagator(name, inputs, [output], () => {
                 combineLatest(inputs_pub).pipe(
                     map(values => {
-                        console.log("values in map", values);
                         return f(...values);
                     }),
-
-                    
-                    
                 ).subscribe(result => {
                     add_cell_content(output, result);
                 });
@@ -71,6 +65,7 @@ export function primitive_propagator(f: (...inputs: any[]) => any, name: string)
 
 export function compound_propagator(inputs: Cell[], outputs: Cell[], to_build: () => void, name: string): Either<string, Propagator>{
     const me = new Propagator(name, inputs, outputs, () => {
+        // TODO: this is not good, in typescript there is no equivalent of parameterize in scheme, perhaps use readerMonad?
         set_global_parent(me.getRelation());
         to_build();
     });

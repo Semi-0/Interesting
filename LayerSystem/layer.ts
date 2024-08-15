@@ -7,8 +7,10 @@ import { filterMap } from "fp-ts/Array"
 import { some } from "fp-ts/lib/OptionT"
 import { option } from "fp-ts"
 import { inspect } from "bun"
+import { map } from "fp-ts/Array"
+import { construct_simple_generic_procedure } from "generic-handler/GenericProcedure"
 
-class Layer{
+export class Layer{
     name: string
     value: any | undefined
 
@@ -37,19 +39,19 @@ class Layer{
 }
 
 
-class BaseLayer extends Layer{
+export class BaseLayer extends Layer{
     constructor(value: any){
         super("base", value)
     }
 }
 
-class AnnotationLayer extends Layer{
+export class AnnotationLayer extends Layer{
     constructor(name: string, value: any){
         super(name, value)
     }
 }
 
-function get_unit_procedure(name: string, arity: number){
+export function get_unit_procedure(name: string, arity: number){
     if (name === "square" && arity === 1){
         return (b: any, ...vs: any) => {
                 return  vs
@@ -60,7 +62,7 @@ function get_unit_procedure(name: string, arity: number){
     }
 }
 
-class UnitLayer extends Layer{
+export class UnitLayer extends Layer{
     constructor( value: any){
         super("unit", value, (b: any, ...v: any) => v)
     }
@@ -77,7 +79,7 @@ class UnitLayer extends Layer{
 }
 
 
-class ReferenceLayer extends Layer{
+export class ReferenceLayer extends Layer{
 
     constructor(value: string){
         super("reference", value)
@@ -90,7 +92,7 @@ class ReferenceLayer extends Layer{
     }
 }
 
-class LayeredObject{
+export class LayeredObject{
     alist: Layer[]
 
     constructor(base_value: any, alist: Layer[] | null){
@@ -106,8 +108,12 @@ class LayeredObject{
         return this.alist.length > 0
     }
 
+    get_layer(name: string): Layer | undefined{
+        return this.alist.find(l => l.get_name() === name)
+    }
+
     get_layer_value(layer: string): any | undefined{
-        return this.alist.find(l => l.get_name() === layer)?.get_value()
+        return this.get_layer(layer)?.get_value()
     }
 
     get_annotations(): string[] {
@@ -129,6 +135,7 @@ class LayeredObject{
     }
 }
 
+export const get_base_value = construct_simple_generic_procedure("get_base_value", 1, (a: any) => get_base_layer_value(a))
 
 function get_base_layer_value(obj: LayeredObject): any{
     if (obj instanceof LayeredObject){
@@ -204,12 +211,27 @@ function set_layered_procedure_metadata(proc: (arg: any) => any, metadata: Layer
     meta_data_store.set(proc, metadata)
 }
 
-function make_layered_procedure(name: string, arity: number, base_proc: (...v: any) => any): (...args : any) => any{
+export function make_layered_procedure(name: string, arity: number, base_proc: (...v: any) => any): (...args : any) => any{
     const metadata = new LayeredProcedureMetadata(name, arity, base_proc)
     set_layered_procedure_metadata(base_proc, metadata)
     return layed_procedure_dispatch(metadata)
 }
 
+function get_layered_procedure_metadata(proc: (...args: any) => any): LayeredProcedureMetadata | undefined{
+    return meta_data_store.get(proc)
+}
+
+
+
+export function define_layered_procedure_handler(procedure: (...args: any) => any, layer: string, handler: (b: any, ...v: any) => any){
+    const metadata = get_layered_procedure_metadata(procedure)
+    if (metadata){
+        metadata.set_handler(layer, handler)
+    }
+    else{
+        throw new Error(`define_layered_procedure_handler: procedure = ${procedure} not found`)
+    }
+}
 
 function layed_procedure_dispatch(metaData: LayeredProcedureMetadata) {
     return (...args: LayeredObject[]) => {

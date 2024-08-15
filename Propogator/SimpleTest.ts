@@ -55,10 +55,10 @@ x.getStrongest().subscribe(value => console.log("x update", value));
 
 c_multiply(x, y, product);
 
-tell(x, 3);
+tell(x, 4);
 get_all_cells().forEach(cell => console.log(cell.summarize()));
 
-tell(product, 21);
+tell(product, 40);
 get_all_cells().forEach(cell => console.log(cell.summarize()));
 
 
