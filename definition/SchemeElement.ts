@@ -167,7 +167,12 @@ export function construct_feedback(msg: string): SchemeElement{
 }
 // adaptor for generic_array
 
-import { get_element, set_element, get_length, isArray } from 'pmatcher/GenericArray';
+import { get_element as _get_element, set_element as _set_element, get_length as _get_length, isArray as _isArray } from 'pmatcher/GenericArray';
+
+const get_element = construct_simple_generic_procedure("get_element", 2, _get_element)
+const set_element = construct_simple_generic_procedure("set_element", 3, _set_element)
+const get_length = construct_simple_generic_procedure("get_length", 1, _get_length)
+const isArray = construct_simple_generic_procedure("isArray", 1, _isArray)
 
 
 define_generic_procedure_handler(get_element, 
@@ -201,9 +206,11 @@ define_generic_procedure_handler(isArray,
 )
 
 
-import { equal } from 'pmatcher/utility'; 
+import { equal  as _equal } from 'pmatcher/utility'; 
 import { Closure } from './Closure';
 import type { Environment } from './Environment';
+
+const equal = construct_simple_generic_procedure("equal", 2, _equal)
 
 
 define_generic_procedure_handler(equal,
