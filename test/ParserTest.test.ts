@@ -66,7 +66,7 @@ import { interp } from '../Repl';
 import { DefaultEnvironment } from '../definition/Environment';
 import {  SchemeType } from '../definition/SchemeElement';
 import { match, P } from 'pmatcher/MatchBuilder';
-import { inspect } from 'util';
+
 
 describe('REPL Functionality', () => {
     // ... existing tests ...

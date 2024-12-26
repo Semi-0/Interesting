@@ -5,7 +5,7 @@ import { define, lookup, type DefaultEnvironment } from "./definition/Environmen
 import {P, match} from "pmatcher/MatchBuilder"
 import { isSucceed } from "pmatcher/Predicates"
 import { apply as apply_matched} from "pmatcher/MatchResult/MatchGenericProcs"
-import { apply as apply_interp } from "./apply"
+import { apply as apply_interp } from "./Apply"
 import { schemeList } from "./definition/SchemeElement"
 import { make_matcher } from "./tools/GenericWrapper"
 import { is_scheme_symbol } from "./definition/SchemeElement"

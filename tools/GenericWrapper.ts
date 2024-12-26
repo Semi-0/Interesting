@@ -28,7 +28,7 @@ export function generic_wrapper(
   }
   
 
-  import { inspect } from 'util';
+
 
   function getArity(func: Function): number {
     return func.length;
