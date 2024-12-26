@@ -51,7 +51,7 @@ export class DefaultEnvironment implements Env {
 
     copy(): DefaultEnvironment {
         // CAUTIOUS!!!!
-        return construct_default_environment(this.name, this.dict, this.loaded_packages, this.ref)
+        return construct_default_environment(this.name, {...this.dict}, this.loaded_packages, this.ref)
     }
 
     load(pkg: Env): void {
@@ -112,8 +112,10 @@ define_generic_procedure_handler(
     match_args(isString, is_env), 
     (key: string, env: Env) => {
         const v = env.dict[key];
+        console.log("try to lookup", key, v)
         if (v !== undefined) {
             if (get_largest_scope(v) <= env.ref) {
+                console.log("get_value_in_largest_scope", get_value_in_largest_scope(v))
                 return get_value_in_largest_scope(v)
             }
             else {

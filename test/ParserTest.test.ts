@@ -62,7 +62,7 @@ describe('parseExpr', () => {
   });
 });
 
-import { interp } from '../Repl';
+import { interp } from '../Main';
 import { DefaultEnvironment } from '../definition/Environment';
 import {  SchemeType } from '../definition/SchemeElement';
 import { match, P } from 'pmatcher/MatchBuilder';

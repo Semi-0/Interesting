@@ -1,6 +1,3 @@
-
-
-
 export function guard(condition: boolean, else_branch: () => void): void {
     if (condition) {
         return
@@ -68,4 +65,64 @@ const original = { a: 1, b: { c: 2 } };
 export function summarize_dict(dict: any, value_string: (value: any) => string): string{
     return Object.entries(dict).map(([key, value]) => `${key}: ${value_string(value)}`)
     .join(", ")
+}
+
+interface FileValidationOptions {
+    requiredExtension?: string;
+    caseSensitive?: boolean;
+    allowedExtensions?: string[];
+}
+
+export function validateFile(filePath: string, options: FileValidationOptions = {}): boolean {
+    const {
+        requiredExtension = '.pscheme',
+        caseSensitive = false,
+        allowedExtensions = ['.pscheme']
+    } = options;
+
+    // Basic path validation
+    if (!filePath || typeof filePath !== 'string') {
+        throw new Error('Invalid file path');
+    }
+
+    // Get the file extension
+    const fileExt = filePath.slice(filePath.lastIndexOf('.'));
+    
+    // Compare extensions based on case sensitivity
+    const compare = (a: string, b: string): boolean => caseSensitive 
+        ? a === b 
+        : a.toLowerCase() === b.toLowerCase();
+
+    // Check if extension is in allowed list
+    const isValidExt = allowedExtensions.some(ext => 
+        compare(fileExt, ext.startsWith('.') ? ext : `.${ext}`)
+    );
+
+    if (!isValidExt) {
+        throw new Error(
+            `Invalid file type. File must end with: ${allowedExtensions.join(', ')}`
+        );
+    }
+
+    return true;
+}
+
+export async function loadFile(filePath: string, options: FileValidationOptions = {}): Promise<string> {
+    // Validate file before attempting to load
+    validateFile(filePath, options);
+
+    try {
+        if (typeof process !== 'undefined' && process.versions?.node) {
+            const { readFile } = await import('fs/promises');
+            return await readFile(filePath, 'utf-8');
+        } else {
+            const response = await fetch(filePath);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.text();
+        }
+    } catch (error) {
+        throw new Error(`Failed to load file: ${error instanceof Error ? error.message : String(error)}`);
+    }
 }
