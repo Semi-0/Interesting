@@ -149,7 +149,7 @@ describe('Interpreter Tests', () => {
 
   test("evaluate multiple line args", () => {
     const expr = "(define x 1)\nx"
-    const result: SchemeElement = interp(env)(expr);
+    const result: SchemeElement = main(expr);
     expect(result.get_type()).toEqual(SchemeType.number);
     expect(result.get_value()).toEqual(1);
   });

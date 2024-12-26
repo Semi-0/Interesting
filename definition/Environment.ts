@@ -153,7 +153,7 @@ define_generic_procedure_handler(
     }
 );
 
-export function set_value(env: Env, key: string, value: any){
+export function define_value(env: Env, key: string, value: any){
     if (env.has(key))  {
         const existed = lookup_for_scoped_value(key, env)
         if (scope_not_exist_before(existed, env.ref)) {
@@ -169,10 +169,21 @@ export function set_value(env: Env, key: string, value: any){
 }
 
 
+export function set_value(env: Env, key: string, value: any){
+    if (env.has(key))  {
+        const existed = lookup_for_scoped_value(key, env)
+        set_scoped_value(existed, env.ref, value)
+    }
+    else{
+        env.dict[key] = create_dict_value(value, env.ref)
+    }
+}
+
+
 export function extend_value(env: Env, key: string, value: any): Env{
     const new_env = copy_environment(env)
 
-    set_value(new_env, key, value)
+    define_value(new_env, key, value)
 
     return new_env
 }
@@ -240,7 +251,7 @@ define_generic_procedure_handler(
     define,
     match_args(isString, is_scheme_element, is_env),
     (key: string, value: SchemeElement, env: Env) => {
-        set_value(env, key, value)
+        define_value(env, key, value)
         return construct_feedback(key + " defined" + " with " + value.toString())
     }
 );
