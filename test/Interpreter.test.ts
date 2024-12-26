@@ -1,6 +1,6 @@
 import { schemeList } from '../definition/SchemeElement';
 import { DefaultEnvironment } from '../definition/Environment';
-import { clear_env, interp, main } from '../Main';
+import { clear_env, interp, interp_file, main } from '../Main';
 import { schemeSymbol, schemeBoolean, schemeNumber, SchemeElement, SchemeType } from '../definition/SchemeElement';
 
 describe('Interpreter Tests', () => {
@@ -188,6 +188,35 @@ describe('Interpreter Tests', () => {
     expect(result.get_type()).toEqual(SchemeType.number);
     expect(result.get_value()).toEqual(1);
   });
+
+  test('evaluate fibonacci from file', async () => {
+    const result = await interp_file("./TestFiles/testFib.pscheme");
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(55);
+  });
+
+  test('evaluate basic cond expression', () => {
+    const expr = "(cond ((#f 1) (#t 2) (else 3)))"
+    const result = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(2);
+  });
+
+  test('evaluate cond with else clause', () => {
+    const expr = "(cond ((#f 1) (#f 2) (else 3)))"
+    const result = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(3);
+  });
+
+  test('evaluate cond with computed predicates', () => {
+    const expr = "(cond (((eq? 1 2) 1) ((> 2 1) 2) (else 3)))"
+    const result = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(2);
+  });
+
+
 
   // TODO: cond 
   // define apply

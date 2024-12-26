@@ -67,7 +67,7 @@ export async function interp_file(filePath: string): Promise<SchemeElement>{
 }
 
 
-console.log(await interp_file("./test.pscheme"))
+console.log(await interp_file("./TestFiles/testFib.pscheme"))
 
 // // todo contious evaluation if parsing is not totally exhausted
 // console.log(main(`(define x 1)

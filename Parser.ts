@@ -1,4 +1,4 @@
-import { Parser, charCode, oneOf, skipMany1,  seq, char, many, noneOf, parse, State, choice, letter, digit, fmap, many1, sepBy } from "parse-combinator"
+import { Parser, charCode, oneOf, skipMany1,  seq, char, many, noneOf, parse, State, choice, letter, string,  digit, fmap, many1, sepBy } from "parse-combinator"
 import  { SchemeElement, schemeStr, schemeNumber, schemeBoolean, schemeSymbol, schemeList } from "./definition/SchemeElement"
 import * as util from 'util';
 

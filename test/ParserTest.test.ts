@@ -74,7 +74,7 @@ describe('REPL Functionality', () => {
     test('matches SchemeElement with pattern', () => {
         const test_array = new SchemeElement([schemeNumber(1), schemeSymbol("2"), schemeSymbol("3")], SchemeType.list);
         const test_result = match(test_array, [[P.element, "a"], "2", "3"]);
-        console.log(test_result)
+  
         // Add assertions based on the expected structure of test_result
         expect(test_result).toBeDefined();
         expect(test_result._dictionary).toBeDefined();
