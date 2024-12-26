@@ -1,13 +1,11 @@
 // export type LispElement = Atom | Expression | Array<LispElement> | string ;
 
 // export type AtomValue = string | number | boolean 
-import type { List } from 'effect';
-// ATOM
-import { inspect } from 'util';
-import { construct_simple_generic_procedure, define_generic_procedure_handler } from 'generic-handler/GenericProcedure';
+
 import { match_args } from 'generic-handler/Predicates';
-import { isNumber, isString } from 'effect/Predicate';
-import { match, P } from 'pmatcher/MatchBuilder';
+import { isString } from 'effect/Predicate';
+
+import { construct_simple_generic_procedure, define_generic_procedure_handler } from 'generic-handler/GenericProcedure';
 export enum SchemeType{
     string = "String",
     number = "Number",
@@ -167,30 +165,27 @@ export function construct_feedback(msg: string): SchemeElement{
 }
 // adaptor for generic_array
 
-import { get_element as _get_element, set_element as _set_element, get_length as _get_length, isArray as _isArray } from 'pmatcher/GenericArray';
-
-const get_element = construct_simple_generic_procedure("get_element", 2, _get_element)
-const set_element = construct_simple_generic_procedure("set_element", 3, _set_element)
-const get_length = construct_simple_generic_procedure("get_length", 1, _get_length)
-const isArray = construct_simple_generic_procedure("isArray", 1, _isArray)
+import { get_element , set_element , get_length , isArray  } from 'pmatcher/GenericArray';
+import { define_generic_procedure_handler as define_matcher_handler } from "pmatcher/node_modules/generic-handler/GenericProcedure"
+import { match_args as p_match_args } from "pmatcher/node_modules/generic-handler/Predicates"
 
 
-define_generic_procedure_handler(get_element, 
-    match_args(isSchemeArray, (index: number) => true),
+define_matcher_handler(get_element, 
+    p_match_args(isSchemeArray, (index: number) => true),
     (element: SchemeElement, index: number) => {
         return element.get_value()[index]
     }
 )
 
-define_generic_procedure_handler(set_element,
-    match_args(isSchemeArray, (index: number) => true, (value: SchemeElement) => true),
+define_matcher_handler(set_element,
+    p_match_args(isSchemeArray, (index: number) => true, (value: SchemeElement) => true),
     (element: SchemeElement, index: number, value: SchemeElement) => {
         return element.update_value(element.get_value().map((e: SchemeElement, i: number) => i === index ? value : e))
     }
 )
 
-define_generic_procedure_handler(get_length,
-    match_args(isSchemeArray, (index: number) => true),
+define_matcher_handler(get_length,
+    p_match_args(isSchemeArray, (index: number) => true),
     (element: SchemeElement) => {
         return element.get_value().length
     }
@@ -198,23 +193,21 @@ define_generic_procedure_handler(get_length,
 
 
 
-define_generic_procedure_handler(isArray,
-    match_args(isSchemeArray, (index: number) => true),
+define_matcher_handler(isArray,
+    p_match_args(isSchemeArray, (index: number) => true),
     (element: SchemeElement) => {
         return true
     }
 )
 
 
-import { equal  as _equal } from 'pmatcher/utility'; 
+import { equal } from 'pmatcher/utility'; 
 import { Closure } from './Closure';
 import type { Environment } from './Environment';
 
-const equal = construct_simple_generic_procedure("equal", 2, _equal)
 
-
-define_generic_procedure_handler(equal,
-    match_args(is_scheme_symbol , isString),
+define_matcher_handler(equal,
+    p_match_args(is_scheme_symbol , isString),
     (a: SchemeElement , b: string) => {
         return a.get_value() === b
     }
