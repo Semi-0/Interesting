@@ -2,7 +2,7 @@ import { construct_simple_generic_procedure, define_generic_procedure_handler } 
 import { match_args } from "generic-handler/Predicates"
 import { SchemeElement, is_scheme_boolean, is_scheme_element, is_scheme_symbol  } from "./definition/SchemeElement"
 
-import { is_environment, Environment } from "./definition/Environment"
+import { is_env, DefaultEnvironment, new_sub_environment } from "./definition/Environment"
 
 import { SchemeType } from "./definition/SchemeElement"
 
@@ -14,7 +14,7 @@ export const apply = construct_simple_generic_procedure("apply_eval",
     4, default_apply
 )
 
-function default_apply(procedure: SchemeElement, operands: SchemeElement[], env: Environment, continuation: (result: SchemeElement, env: Environment) => SchemeElement){
+function default_apply(procedure: SchemeElement, operands: SchemeElement[], env: DefaultEnvironment, continuation: (result: SchemeElement, env: DefaultEnvironment) => SchemeElement){
    throw Error("unknown procedure type" + procedure.toString() + "with operands" + operands.toString() + "in environment" + env.toString())
 }
 
@@ -30,7 +30,7 @@ define_generic_procedure_handler(apply,
     match_args( 
         is_primitive_func,
         is_operands,
-        is_environment,
+        is_env,
         is_continuation,
     ),
     (operator, operands, env, continuation) => {
@@ -42,7 +42,7 @@ export function apply_primitive_function(func: SchemeElement, ...args: SchemeEle
     return map_procedure(func, (f: (...args: any[]) => any) => f(...args.map((arg: SchemeElement) => arg.get_value())))
 }
 
-function eval_operands(operands: SchemeElement[], env: Environment, continuation: (result: SchemeElement, env: Environment) => SchemeElement): SchemeElement[]{
+function eval_operands(operands: SchemeElement[], env: DefaultEnvironment, continuation: (result: SchemeElement, env: DefaultEnvironment) => SchemeElement): SchemeElement[]{
     return operands.map(operand => continuation(operand, env))
 }
 
@@ -51,10 +51,10 @@ define_generic_procedure_handler(apply,
     match_args(
         is_strict_compound_procedure,
         is_operands,
-        is_environment,
+        is_env,
         is_continuation,
     ),
-    (procedure: SchemeElement, operands: SchemeElement[], env: Environment, continuation: (result: SchemeElement, env: Environment) => SchemeElement) => {
+    (procedure: SchemeElement, operands: SchemeElement[], env: DefaultEnvironment, continuation: (result: SchemeElement, env: DefaultEnvironment) => SchemeElement) => {
         return apply_compound_procedure(procedure, eval_operands(operands, env, continuation), env, continuation)
     }
 )
@@ -65,13 +65,13 @@ function is_strict_compound_procedure(procedure: SchemeElement): boolean{
 
 function apply_compound_procedure(procedure: SchemeElement, 
     operands: SchemeElement[],
-     env: Environment, 
-     continuation: (result: SchemeElement, env: Environment) => SchemeElement): SchemeElement{
+     env: DefaultEnvironment, 
+     continuation: (result: SchemeElement, env: DefaultEnvironment) => SchemeElement): SchemeElement{
     if (procedure.value.parameters.length !== operands.length){
         throw Error("wrong number of arguments")
     }
     
-    let new_env = extend(procedure.value.parameters, operands, procedure.value.env)
-    console.log("extended env", new_env.summarize())
+    let new_env = new_sub_environment(extend(procedure.value.parameters, operands, procedure.value.env))
+ 
     return continuation(procedure.value.body, new_env)
 }

@@ -1,14 +1,14 @@
 import {parseExpr} from "./Parser"
 import {parse, State} from "parse-combinator"
 import { define_expr, evaluate } from "./Evaluator"
-import { Environment } from "./definition/Environment"
+import { DefaultEnvironment } from "./definition/Environment"
 import { SchemeElement } from "./definition/SchemeElement"
 
 import { match, P } from "pmatcher/MatchBuilder"
 import { Reply } from "parse-combinator"
-type returnType = [any, Environment]
+type returnType = [any, DefaultEnvironment]
 
-function continuation(exp: SchemeElement, env: Environment): SchemeElement {
+function continuation(exp: SchemeElement, env: DefaultEnvironment): SchemeElement {
     // console.log("continuation", exp.toString(), inspect(env))
     return evaluate(exp, env, continuation)
 }
@@ -26,7 +26,7 @@ export function jump_to_next_paren(parsed: Reply<any, any>, input: string): stri
     return skip_return(input.slice(parsed.state.position))
 }
 
-export function interp(env: Environment): (input: string) => SchemeElement {
+export function interp(env: DefaultEnvironment): (input: string) => SchemeElement {
     return (input: string) => {
         const parsed = parse(parseExpr, new State(input))
         // console.log("parsed", parsed.value?.toString())
@@ -47,7 +47,13 @@ export function interp(env: Environment): (input: string) => SchemeElement {
     }
 }
 
-export const main = interp(new Environment())
+const env = new DefaultEnvironment()
+export const main = interp(env)
+
+export function clear_env(){
+    // for debug
+    env.dict = {}
+}
 
 // // todo contious evaluation if parsing is not totally exhausted
 // console.log(main(`(define x 1)

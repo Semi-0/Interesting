@@ -1,7 +1,7 @@
 import { construct_simple_generic_procedure } from "generic-handler/GenericProcedure"
 import { SchemeType,  SchemeElement, is_self_evaluating, schemeSymbol, is_true, schemeNumber, schemeClosure } from "./definition/SchemeElement"
 import { define_generic_matcher, define_logged_generic_matcher } from "./tools/ExpressionHandler"
-import { define, lookup, type Environment } from "./definition/Environment"
+import { define, lookup, type DefaultEnvironment } from "./definition/Environment"
 import {P, match} from "pmatcher/MatchBuilder"
 import { isSucceed } from "pmatcher/Predicates"
 import { apply as apply_matched} from "pmatcher/MatchResult/MatchGenericProcs"
@@ -16,7 +16,7 @@ import { set } from "./definition/Environment"
 import { will_define } from "pmatcher/MatchDict/DictValue"
 
 // TODO: Support Currying
-type EvalHandler = (exec: (...args: any[]) => any, env: Environment, continuation: (result: SchemeElement, env: Environment) => SchemeElement) => any;
+type EvalHandler = (exec: (...args: any[]) => any, env: DefaultEnvironment, continuation: (result: SchemeElement, env: DefaultEnvironment) => SchemeElement) => any;
 
 export const evaluate = construct_simple_generic_procedure("evaluate", 3, (expr, env, continuation) => {
     return default_eval(expr, env, continuation)
@@ -30,7 +30,7 @@ const match_application = make_matcher([P.begin, [P.wildcard, P.wildcard, "..."]
                                                  [[P.element, "operator"], [P.segment, "operands"]]])
 
 
-function default_eval(expression: SchemeElement, env: Environment, continuation: (result: SchemeElement, env: Environment) => SchemeElement): SchemeElement{
+function default_eval(expression: SchemeElement, env: DefaultEnvironment, continuation: (result: SchemeElement, env: DefaultEnvironment) => SchemeElement): SchemeElement{
     const application = match_application(expression)
 
     if (isSucceed(application)){
@@ -145,7 +145,7 @@ define_generic_matcher(evaluate, begin_expr, ((exec, env, continuation): EvalHan
     });
 }) as EvalHandler)
 
-function continuation_sequence(actions: SchemeElement[], env: Environment, continuation: (result: SchemeElement, env: Environment) => SchemeElement): SchemeElement{
+function continuation_sequence(actions: SchemeElement[], env: DefaultEnvironment, continuation: (result: SchemeElement, env: DefaultEnvironment) => SchemeElement): SchemeElement{
     if (is_empty(actions)){
         throw Error("empty sequence in evaluate_sequence")
     }

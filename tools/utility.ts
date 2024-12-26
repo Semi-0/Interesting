@@ -65,3 +65,7 @@ export function deepCompare(obj1: any, obj2: any): boolean {
 const original = { a: 1, b: { c: 2 } };
 
 
+export function summarize_dict(dict: any, value_string: (value: any) => string): string{
+    return Object.entries(dict).map(([key, value]) => `${key}: ${value_string(value)}`)
+    .join(", ")
+}

@@ -1,13 +1,14 @@
 import { schemeList } from '../definition/SchemeElement';
-import { Environment } from '../definition/Environment';
-import { interp, main } from '../Repl';
+import { DefaultEnvironment } from '../definition/Environment';
+import { clear_env, interp, main } from '../Repl';
 import { schemeSymbol, schemeBoolean, schemeNumber, SchemeElement, SchemeType } from '../definition/SchemeElement';
 
 describe('Interpreter Tests', () => {
-  let env: Environment;
+  let env: DefaultEnvironment;
 
   beforeEach(() => {
-    env = new Environment();
+ 
+    clear_env()
   });
 
   test('evaluate if expression true branch', () => {

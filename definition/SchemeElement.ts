@@ -156,7 +156,7 @@ export function construct_primitive_procedure(func: Function): SchemeElement{
     return new SchemeElement(func, SchemeType.primitiveFunc)
 }
 
-export function schemeClosure(parameters: SchemeElement[], body: SchemeElement, environment: Environment): SchemeElement{
+export function schemeClosure(parameters: SchemeElement[], body: SchemeElement, environment: DefaultEnvironment): SchemeElement{
     return new SchemeElement(new Closure(parameters, body, environment), SchemeType.closure)
 }
 
@@ -203,7 +203,7 @@ define_matcher_handler(isArray,
 
 import { equal } from 'pmatcher/utility'; 
 import { Closure } from './Closure';
-import type { Environment } from './Environment';
+import type { DefaultEnvironment } from './Environment';
 
 
 define_matcher_handler(equal,
