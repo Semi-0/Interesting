@@ -77,6 +77,9 @@ console.log(await interp_file("./test.pscheme"))
 function preprocessInput(input: string): string {
     return input
         .split('\n')
-        .filter(line => line.trim())  // Remove empty lines
-        .join(' ');  // Join with spaces instead of newlines
+        .filter(line => {
+            const trimmedLine = line.trim();
+            return trimmedLine && !trimmedLine.startsWith('//');  // Skip empty lines and comments
+        })
+        .join(' ');
 }
