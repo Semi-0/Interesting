@@ -66,11 +66,14 @@ define_generic_matcher(evaluate,
     ((exec, env, continuation): EvalHandler => {
         return exec((expr: SchemeElement) => {
             const v = lookup(expr, env)
+        
             if (v !== undefined && v !== null){
                 return v
             }
             else{
-                throw Error("unknown variable" + v + "in environment" + env.toString())
+                throw Error("unknown variable: " + v + "\n" +
+                        "in environment: " + env.summarize() + "\n" +
+                        "of symbol: " + expr.toString())
             }
         });
     }) as EvalHandler

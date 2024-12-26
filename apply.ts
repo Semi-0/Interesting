@@ -63,11 +63,15 @@ function is_strict_compound_procedure(procedure: SchemeElement): boolean{
     return procedure instanceof SchemeElement && procedure.is_type(SchemeType.closure)
 }
 
-function apply_compound_procedure(procedure: SchemeElement, operands: SchemeElement[], env: Environment, continuation: (result: SchemeElement, env: Environment) => SchemeElement): SchemeElement{
+function apply_compound_procedure(procedure: SchemeElement, 
+    operands: SchemeElement[],
+     env: Environment, 
+     continuation: (result: SchemeElement, env: Environment) => SchemeElement): SchemeElement{
     if (procedure.value.parameters.length !== operands.length){
         throw Error("wrong number of arguments")
     }
     
-    let new_env = extend(procedure.value.parameters, operands, env)
+    let new_env = extend(procedure.value.parameters, operands, procedure.value.env)
+    console.log("extended env", new_env.summarize())
     return continuation(procedure.value.body, new_env)
 }

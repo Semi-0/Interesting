@@ -38,6 +38,12 @@ export class Environment{
     not_has(key: string): boolean {
         return this.dict[key] === undefined
     }
+
+    summarize(): string {
+        return Object.entries(this.dict).
+        map(([key, value]) => `${key}: ${value.toString()}`)
+        .join(", ")
+    }
 }
 
 

@@ -19,8 +19,5 @@ export function main(input: string): SchemeElement {
     return evaluate(parsed.value, new Environment(), continuation)
 }
 
-// console.log("result", main("(cond (((equal? 1 2) 'a) ((equal? 1 1) (+ 1 2)) (else  'b)))"))
 
-
-// const t = match(parse(parseExpr, new State("(define x 42)")).value, ["define", [[P.element, "x", (x) => x !== undefined]], [P.element, "y"]])
-// console.log(inspect(t))
+console.log(main("(((lambda (x) (lambda (y) (+ x y))) 2) 3)"))
