@@ -3,7 +3,7 @@ import {parse, State} from "parse-combinator"
 import { define_expr, evaluate } from "./Evaluator"
 import { Environment } from "./definition/Environment"
 import { SchemeElement } from "./definition/SchemeElement"
-import { inspect } from "bun"
+
 import { match, P } from "pmatcher/MatchBuilder"
 
 type returnType = [any, Environment]
@@ -22,5 +22,5 @@ export function main(input: string): SchemeElement {
 // console.log("result", main("(cond (((equal? 1 2) 'a) ((equal? 1 1) (+ 1 2)) (else  'b)))"))
 
 
-const t = match(parse(parseExpr, new State("(define x 42)")).value, ["define", [[P.element, "x", (x) => x !== undefined]], [P.element, "y"]])
-console.log(inspect(t))
+// const t = match(parse(parseExpr, new State("(define x 42)")).value, ["define", [[P.element, "x", (x) => x !== undefined]], [P.element, "y"]])
+// console.log(inspect(t))

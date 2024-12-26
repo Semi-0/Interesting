@@ -1,10 +1,9 @@
 import { construct_simple_generic_procedure, define_generic_procedure_handler } from "generic-handler/GenericProcedure"
 import { match_args } from "generic-handler/Predicates"
-import { SchemeElement, is_scheme_symbol  } from "./definition/SchemeElement"
+import { SchemeElement, is_scheme_boolean, is_scheme_element, is_scheme_symbol  } from "./definition/SchemeElement"
 
 import { is_environment, Environment } from "./definition/Environment"
-import { Closure } from "./definition/Closure"
-import { inspect } from "util"
+
 import { SchemeType } from "./definition/SchemeElement"
 
 import { map_procedure } from "./definition/SchemeElement"
@@ -24,8 +23,7 @@ function is_operands(operands: SchemeElement[]): boolean{
 }
 
 function is_primitive_func(operator: SchemeElement): boolean{
-    return  operator.is_type(SchemeType.primitiveFunc)
-
+    return is_scheme_element(operator) && operator.is_type(SchemeType.primitiveFunc)
 }
 
 define_generic_procedure_handler(apply,

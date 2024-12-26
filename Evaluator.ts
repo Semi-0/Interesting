@@ -14,7 +14,7 @@ import { first, rest } from "pmatcher/GenericArray"
 import { isEmpty as is_empty, get_length, isPair as is_pair } from "pmatcher/GenericArray"
 import { set } from "./definition/Environment"
 import { will_define } from "pmatcher/MatchDict/DictValue"
-import { inspect } from "bun"
+
 // TODO: Support Currying
 type EvalHandler = (exec: (...args: any[]) => any, env: Environment, continuation: (result: SchemeElement, env: Environment) => SchemeElement) => any;
 

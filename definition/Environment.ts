@@ -1,7 +1,7 @@
 import { construct_feedback, is_scheme_element, is_scheme_symbol, map_procedure, type SchemeElement  } from "./SchemeElement"
 import { Closure } from "./Closure"
 import {  is_package, make_primitive_package } from "./PackageSystem"
-import { inspect } from "util"
+
 import { construct_simple_generic_procedure, define_generic_procedure_handler } from "generic-handler/GenericProcedure"
 import { match_args } from "generic-handler/Predicates"
 import { isString } from "effect/Predicate"
@@ -173,7 +173,8 @@ export function is_environment(probablyEnv: any): boolean{
    return probablyEnv instanceof Environment
 }
 
-export const define = construct_simple_generic_procedure("define", 2, (key: string, value: SchemeElement) => { throw Error("no arg match for define, key: " + key + "value: " + inspect(value)) });
+export const define = construct_simple_generic_procedure("define", 2, 
+    (key: string, value: SchemeElement) => { throw Error("no arg match for define, key: " + key + "value: " + value.toString()) });
 
 define_generic_procedure_handler(
     define,
@@ -183,7 +184,7 @@ define_generic_procedure_handler(
             throw Error("key " + key + " already exists in environment")
         }
         env.dict[key] = value;
-        return construct_feedback(key + " defined" + " with " + inspect(value))
+        return construct_feedback(key + " defined" + " with " + value.toString())
     }
 );
 
