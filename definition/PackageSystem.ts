@@ -3,6 +3,7 @@ import { construct_primitive_procedure, SchemeElement } from "./SchemeElement"
 import { create_dict_value, summarize_scoped_value, type scoped_value } from "./ScopedReference"
 import type { Env } from "./Environment"
 import { summarize_dict } from "../tools/utility"
+import { isString } from "pmatcher/utility"
 
 
 // export interface Package{
@@ -17,6 +18,13 @@ import { summarize_dict } from "../tools/utility"
 export const create_default_scoped_primtive_func = compose(construct_primitive_procedure, (value: any) => create_dict_value(value, 0))
 
 
+
+
+
+function is_null(pair: any[]): boolean{
+    return pair.length === 0
+}
+
 export function make_primitive_package(): Env {
     const procedures = {
         "+": (...args: number[]) => args.reduce((a, b) => a + b, 0),
@@ -30,12 +38,10 @@ export function make_primitive_package(): Env {
         "==": (a: number, b: number) => a === b,
         "eq?": (a: any, b: any) => a === b,
         "null?": (a: any) => a === null,
-        "car": (a: any[]) => a[0],
-        "cdr": (a: any[]) => a.slice(1),
-        "cons": (a: any, b: any[]) => [a, ...b],
-        "list": (...a: any[]) => a,
         "display": (a: any) => console.log(a),
         "error": (a: string) => {throw Error(a)},
+ 
+        "is_null": is_null,
     }
 
 

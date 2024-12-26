@@ -1,5 +1,6 @@
-1. change to lexical scope 
-2. is currying working now?
-3. compile file 
+1. change to lexical scope done  
+2. is currying working now? done 
+3. compile file done 
 4. allow import expression
-5. parsing multiple statements
+5. parsing multiple statements done 
+6. list car cdr cons 

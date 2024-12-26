@@ -1,0 +1,13 @@
+(define cons
+   (lambda (a b)
+     (lambda (visitor)
+       (visitor a b))))
+
+(define car 
+  (lambda (pair)
+    (pair (lambda (a b) a))))
+
+(define cdr 
+  (lambda (pair)
+    (pair (lambda (a b) b))))
+

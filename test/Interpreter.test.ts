@@ -217,6 +217,23 @@ describe('Interpreter Tests', () => {
   });
 
 
+  test("car cons cdr", () => {
+    const expr = "(car (cons 1 2)))"
+    const result = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(1);
+  }) 
+
+  test("cdr cons", () => {
+    const expr = "(cdr (cons 1 2))"
+    const result = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(2);
+  }) 
+
+
+
+
 
   // TODO: cond 
   // define apply

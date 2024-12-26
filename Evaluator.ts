@@ -230,6 +230,16 @@ define_generic_matcher(evaluate, define_expr, ((exec, env, continuation): EvalHa
 }) as EvalHandler);
 
 
+
+// export const car_expr = ["car", [P.element, "pair"]]
+
+// define_generic_matcher(evaluate, car_expr, ((exec, env, continuation): EvalHandler => {
+//     return exec((pair: SchemeElement) => {
+        
+//     });
+// }) as EvalHandler)
+
+
 // const test_array = new SchemeElement([schemeNumber(1), new schemeList([schemeSymbol("lambda"), schemeNumber(2), schemeSymbol("3")])], SchemeType.List);
 // const test_result = match(test_array, [[P.element, "a"], ["lambda", [P.element, "b"], "3"]]);
 // console.log(inspect(test_result, {  depth: 20 }));

@@ -1,8 +1,0 @@
-
-Evaluator:
-    ** experiment with layer system and advice system and see which one of them 
-       is more useful and flexible for the evaluator 
-    ** experiment with wrapper function, and see whether it could be a good approach
-       to handle side-effect
-    ** the generic-evaluator should be as generic as possible, so its important to
-       gracefully decouple the args and the match argument
