@@ -71,7 +71,7 @@ function apply_compound_procedure(procedure: SchemeElement,
         throw Error("wrong number of arguments")
     }
     
-    let new_env = new_sub_environment(extend(procedure.value.parameters, operands, procedure.value.env))
- 
+    let new_env = extend(procedure.value.parameters, operands, new_sub_environment(procedure.value.env))
+
     return continuation(procedure.value.body, new_env)
 }

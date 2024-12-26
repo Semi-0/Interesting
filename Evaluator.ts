@@ -71,6 +71,8 @@ define_generic_matcher(evaluate,
                 return v
             }
             else{
+                console.log(env.dict)
+                console.log(env.ref)
                 throw Error("unknown variable: " + v + "\n" +
                         "in environment: " + env.summarize() + "\n" +
                         "of symbol: " + expr.toString())
@@ -131,7 +133,7 @@ function seq_to_begin(seq: SchemeElement[]): SchemeElement{
         return first(seq)
     }
     else{
-        console.log(seq)
+
         return schemeList([schemeSymbol("begin"), ...seq])
     }
 }
@@ -164,7 +166,6 @@ const cond_expr = ["cond", [[P.many, [[P.element, "predicates"], [P.element, "co
 define_generic_matcher(evaluate, cond_expr, 
     ((exec, env, continuation): EvalHandler => {
     return exec((predicates: SchemeElement[], consequents: SchemeElement[]) => {
-        console.log("cond", predicates, consequents)
         return continuation(cond_to_if(predicates, consequents), env)
     });
 }) as EvalHandler)
@@ -194,7 +195,6 @@ const let_expr = ["let", [[P.many, [[P.element, "names"], [P.element, "values"]]
 
 define_generic_matcher(evaluate, let_expr, ((exec, env, continuation): EvalHandler => {
     return exec((names: SchemeElement[], values: SchemeElement[], body: SchemeElement[]) => {
-        console.log("let", names, values, body)
         return continuation(let_to_combination(names, values, body), env);
     });
 }) as EvalHandler);

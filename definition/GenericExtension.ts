@@ -10,7 +10,7 @@ define_generic_procedure_handler(isArray, isSchemeArray, (value: SchemeElement) 
 })
 
 define_generic_procedure_handler(get_element, match_args(isSchemeArray, isNumber), (s: SchemeElement, index: number) => {
-    console.log("executed")
+
     return s.value[index]
 })
 

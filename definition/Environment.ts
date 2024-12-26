@@ -28,8 +28,18 @@ export interface Env{
 
 
 
+
 export function is_env(probablyEnv: any): boolean{
     return probablyEnv instanceof Object && typeof probablyEnv.name === "string" && typeof probablyEnv.dict === "object" && typeof probablyEnv.ref === "number"
+}
+
+export function construct_default_environment(name: string, dict: {[key: string]: scoped_value}, loaded_packages: Env[], ref: ScopeReference): DefaultEnvironment{
+    const env = new DefaultEnvironment()
+    env.name = name
+    env.dict = dict
+    env.loaded_packages = loaded_packages
+    env.ref = ref
+    return env
 }
 
 
@@ -40,9 +50,8 @@ export class DefaultEnvironment implements Env {
     ref: ScopeReference = 0
 
     copy(): DefaultEnvironment {
-        const newEnv = new DefaultEnvironment();
-        newEnv.dict = { ...this.dict };
-        return newEnv;
+        // CAUTIOUS!!!!
+        return construct_default_environment(this.name, this.dict, this.loaded_packages, this.ref)
     }
 
     load(pkg: Env): void {
@@ -62,7 +71,8 @@ export class DefaultEnvironment implements Env {
     }
 
     summarize(): string {
-        return summarize_dict(this.dict, summarize_scoped_value)
+        return summarize_dict(this.dict, summarize_scoped_value) +
+             "ref: " + this.ref
     }
 }
 
@@ -77,6 +87,7 @@ export function copy_environment(env: Env): Env {
 export function new_sub_environment(env: DefaultEnvironment): DefaultEnvironment {
     const newEnv = env.copy()
     newEnv.ref = env.ref + 1;
+    console.log("new sub env", newEnv.summarize())
     return newEnv;
 }
 
@@ -106,7 +117,7 @@ define_generic_procedure_handler(
                 return get_value_in_largest_scope(v)
             }
             else {
-                return undefined
+                return v.get(env.ref)
             }
         } else {
             if (is_default_environment(env)) {
@@ -160,7 +171,7 @@ export function define_value(env: Env, key: string, value: any){
             set_scoped_value(existed, env.ref, value)
         }
         else{
-            throw Error("key " + key + " already exists in environment")
+            throw Error("key " + key + " already exists in environment, " + env.summarize())
         }
     }
     else{

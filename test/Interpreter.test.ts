@@ -146,6 +146,41 @@ describe('Interpreter Tests', () => {
     expect(result.get_value()).toEqual(8);
   });
 
+  test('lexical reference to variable', () => {
+    const expr = "(let ((x 1)) (let ((x 2)) x))"
+    const result = main(expr)
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(2);
+  })
+
+  test('lexical scoping with begin', () => {
+    const expr = "(let ((x 1)) (begin (let ((x 2)) x) x))"
+    const result = main(expr)
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(1);
+  })
+
+  test('lexical scoping with nested lets', () => {
+    const expr = "(let ((x 1)) (let ((y 2)) (let ((x 3)) (+ x y))))"
+    const result = main(expr)
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(5);
+  })
+
+  test('lexical scoping with procedure calls', () => {
+    const expr = "(let ((x 1)) ((lambda (x) x) 2))"
+    const result = main(expr)
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(2);
+  })
+
+  test('lexical scoping with multiple bindings', () => {
+    const expr = "(let ((x 1) (y 2)) (let ((x y) (y x)) (+ x y)))"
+    const result = main(expr)
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(3);
+  })
+
 
   test("evaluate multiple line args", () => {
     const expr = "(define x 1)\nx"
