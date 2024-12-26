@@ -112,7 +112,7 @@ define_generic_matcher(evaluate, if_expr, ((exec, env, continuation): EvalHandle
 
 const lambda_expr = ["lambda", [[P.segment_independently, "parameters"]], [P.segment, "body"]]
 
-define_logged_generic_matcher(evaluate, lambda_expr, ((exec, env, continuation): EvalHandler => {
+define_generic_matcher(evaluate, lambda_expr, ((exec, env, continuation): EvalHandler => {
     return exec((parameters: SchemeElement[], body: SchemeElement[]) => {
         return   schemeClosure(parameters, seq_to_begin(body), env)
     });
