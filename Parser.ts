@@ -60,7 +60,6 @@ export const parseExpr: Parser<SchemeElement> = choice([
 
 
 
-
-// const test = parse(parseExpr, new State("(lambda (x) (+ 1 2))"))
+// const test = parse(parseExpr, new State("(x) (x)"))
 // console.log(test.toString())
 // console.log(util.inspect(test, {showHidden: true, depth: 8}))

@@ -1,6 +1,6 @@
 import { schemeList } from '../definition/SchemeElement';
 import { Environment } from '../definition/Environment';
-import { main } from '../Repl';
+import { interp, main } from '../Repl';
 import { schemeSymbol, schemeBoolean, schemeNumber, SchemeElement, SchemeType } from '../definition/SchemeElement';
 
 describe('Interpreter Tests', () => {
@@ -88,6 +88,14 @@ describe('Interpreter Tests', () => {
     expect(result.get_value()).toEqual(24);
   });
 
+
+  test('evaluate lambda expression with currying', () => {
+    const expr = "(((lambda (y) (lambda (x) (+ x y))) 1) 2)"
+    const result = main(expr)
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(3);
+  })
+
   test('evaluate let expression', () => {
     const expr = "(let ((x 5)) x)"
     const result: SchemeElement = main(expr);
@@ -136,6 +144,19 @@ describe('Interpreter Tests', () => {
     expect(result.get_type()).toEqual(SchemeType.number);
     expect(result.get_value()).toEqual(8);
   });
+
+
+  test("evaluate multiple line args", () => {
+    const expr = "(define x 1)\nx"
+    const result: SchemeElement = interp(env)(expr);
+    expect(result.get_type()).toEqual(SchemeType.number);
+    expect(result.get_value()).toEqual(1);
+  });
+
+  // TODO: cond 
+  // define apply
+  // tail recursion
+  // curring in 
 
   // Additional tests for cond, begin, and set! can be added here
 });

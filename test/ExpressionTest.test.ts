@@ -19,7 +19,7 @@ describe('Expression Handler', () => {
         );
 
         const result = test_eval([1, "b"], 2);
-        console.log(result)
+
         expect(result).toBe(3);
     });
 });

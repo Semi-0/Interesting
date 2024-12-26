@@ -189,8 +189,10 @@ define_generic_procedure_handler(
         if (env.has(key)){
             throw Error("key " + key + " already exists in environment")
         }
-        env.dict[key] = value;
-        return construct_feedback(key + " defined" + " with " + value.toString())
+        else{
+            env.dict[key] = value;
+            return construct_feedback(key + " defined" + " with " + value.toString())
+        }
     }
 );
 

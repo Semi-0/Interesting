@@ -219,9 +219,7 @@ export const define_expr =  [P.new, ["parameters"],
                                     ]]
 define_generic_matcher(evaluate, define_expr, ((exec, env, continuation): EvalHandler => {
     return exec((name: SchemeElement, parameters: SchemeElement[] | string, body: SchemeElement[]) => {
-        console.log("define",'name', name, 'parameters', parameters, 'body', body)
         if (parameters === will_define){
-           
             return define(name, continuation(seq_to_begin(body), env), env)
         }
         else{
