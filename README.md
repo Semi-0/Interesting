@@ -1,4 +1,4 @@
-# pscheme
+# interesting
 
 To install dependencies:
 
