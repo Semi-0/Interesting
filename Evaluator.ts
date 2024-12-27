@@ -5,7 +5,7 @@ import { define, lookup, type DefaultEnvironment } from "./definition/Environmen
 import {P, match} from "pmatcher/MatchBuilder"
 import { isSucceed } from "pmatcher/Predicates"
 import { apply as apply_matched} from "pmatcher/MatchResult/MatchGenericProcs"
-import { apply as apply_interp } from "./Apply"
+import { apply as apply_interp } from "./apply"
 import { schemeList } from "./definition/SchemeElement"
 import { make_matcher } from "./tools/GenericWrapper"
 import { is_scheme_symbol } from "./definition/SchemeElement"
@@ -71,8 +71,6 @@ define_generic_matcher(evaluate,
                 return v
             }
             else{
-                console.log(env.dict)
-                console.log(env.ref)
                 throw Error("unknown variable: " + v + "\n" +
                         "in environment: " + env.summarize() + "\n" +
                         "of symbol: " + expr.toString())
@@ -262,7 +260,6 @@ export const cons_expr = ["cons", [P.element, "a"], [P.element, "b"]]
 
 define_generic_matcher(evaluate, cons_expr, ((exec, env, continuation): EvalHandler => {
     return exec((a: SchemeElement, b: SchemeElement) => {
-
         if (isSchemeList(b)){
             return schemeList([a, ...b.value])
         }
