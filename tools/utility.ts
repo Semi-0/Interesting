@@ -126,3 +126,19 @@ export async function loadFile(filePath: string, options: FileValidationOptions 
         throw new Error(`Failed to load file: ${error instanceof Error ? error.message : String(error)}`);
     }
 }
+
+export function loadFileSync(filePath: string, options: FileValidationOptions = {}): string {
+    // Validate file before attempting to load
+    validateFile(filePath, options);
+
+    try {
+        if (typeof process !== 'undefined' && process.versions?.node) {
+            const fs = require('fs');
+            return fs.readFileSync(filePath, 'utf-8');
+        } else {
+            throw new Error('Synchronous file loading is only available in Node.js environment');
+        }
+    } catch (error) {
+        throw new Error(`Failed to load file: ${error instanceof Error ? error.message : String(error)}`);
+    }
+}

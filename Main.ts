@@ -2,13 +2,15 @@ import {parseExpr} from "./Parser"
 import {parse, State} from "parse-combinator"
 import { define_expr, evaluate } from "./Evaluator"
 import { DefaultEnvironment } from "./definition/Environment"
-import { SchemeElement } from "./definition/SchemeElement"
+import { construct_feedback, SchemeElement } from "./definition/SchemeElement"
 
 import { match, P } from "pmatcher/MatchBuilder"
 import { Reply } from "parse-combinator"
-import { loadFile } from "./tools/utility"
+import { loadFile, loadFileSync } from "./tools/utility"
 import { define_generic_matcher } from "./tools/ExpressionHandler"
 import type { EvalHandler } from "./Evaluator"
+import path from 'path';
+
 type returnType = [any, DefaultEnvironment]
 
 function continuation(exp: SchemeElement, env: DefaultEnvironment): SchemeElement {
@@ -60,28 +62,39 @@ export function clear_env(){
 }
 
 
-
+var current_file_path = ""
 
 export async function evaluate_file(filePath: string, env: DefaultEnvironment): Promise<SchemeElement>{
-    const code = await loadFile(filePath, {requiredExtension: ".pscheme"})
-
+    const code = loadFileSync(filePath, {requiredExtension: ".pscheme"})
+    current_file_path = filePath
     return interp(env)(code)
 }
 
-// i know this is not a good way, but this is the way to prevent circular dependency 
+const PROJECT_ROOT = path.resolve(__dirname, '..');
 
+function resolveRelativePath(basePath: string, relativePath: string): string {
+    const path = require('path');
+    // If the path starts with '/', treat it as relative to project root
+    if (relativePath.startsWith('/')) {
+        return path.join(PROJECT_ROOT, relativePath.slice(1));
+    }
+    // Otherwise, resolve relative to the current file
+    const baseDir = path.dirname(basePath);
+    return path.resolve(baseDir, relativePath);
+}
+
+// i know this is not a good way, but this is the way to prevent circular dependency 
+// file path would depending on the file path of the current file
+// load only works in node.js
 export const load_expr = ["load", [P.element, "file_path"]]
 
 define_generic_matcher(evaluate, load_expr, ((exec, env, continuation): EvalHandler => {
     return exec((file_path: SchemeElement) => {
-        return evaluate_file(evaluate(file_path, env, continuation).value, env)
+       const resolvedPath = resolveRelativePath(current_file_path, file_path.value);
+       return evaluate_file(resolvedPath, env)
     });
 }) as EvalHandler)
 
-
-// // todo contious evaluation if parsing is not totally exhausted
-// console.log(main(`(define x 1)
-// x`));
 
 // Before parsing, let's clean up the input
 function preprocessInput(input: string): string {
@@ -95,4 +108,4 @@ function preprocessInput(input: string): string {
 }
 
 
-// console.log(await evaluate_file("./TestFiles/primitivePair.pscheme", env))
+// console.log(await evaluate_file("./TestFiles/testLoad.pscheme", env))

@@ -4,4 +4,4 @@
         0
         (+ 1 (get_length (cdr list))))))
 
-(get_length '(1 2 3 4 5))
+// (get_length '(1 2 3 4 5))
