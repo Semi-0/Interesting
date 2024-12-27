@@ -7,6 +7,8 @@ import { SchemeElement } from "./definition/SchemeElement"
 import { match, P } from "pmatcher/MatchBuilder"
 import { Reply } from "parse-combinator"
 import { loadFile } from "./tools/utility"
+import { define_generic_matcher } from "./tools/ExpressionHandler"
+import type { EvalHandler } from "./Evaluator"
 type returnType = [any, DefaultEnvironment]
 
 function continuation(exp: SchemeElement, env: DefaultEnvironment): SchemeElement {
@@ -60,14 +62,22 @@ export function clear_env(){
 
 
 
-export async function interp_file(filePath: string): Promise<SchemeElement>{
+export async function evaluate_file(filePath: string, env: DefaultEnvironment): Promise<SchemeElement>{
     const code = await loadFile(filePath, {requiredExtension: ".pscheme"})
 
     return interp(env)(code)
 }
 
+// i know this is not a good way, but this is the way to prevent circular dependency 
 
-console.log(await interp_file("./TestFiles/primitivePair.pscheme"))
+export const load_expr = ["load", [P.element, "file_path"]]
+
+define_generic_matcher(evaluate, load_expr, ((exec, env, continuation): EvalHandler => {
+    return exec((file_path: SchemeElement) => {
+        return evaluate_file(evaluate(file_path, env, continuation).value, env)
+    });
+}) as EvalHandler)
+
 
 // // todo contious evaluation if parsing is not totally exhausted
 // console.log(main(`(define x 1)
@@ -83,3 +93,6 @@ function preprocessInput(input: string): string {
         })
         .join(' ');
 }
+
+
+// console.log(await evaluate_file("./TestFiles/primitivePair.pscheme", env))

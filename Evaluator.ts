@@ -1,5 +1,5 @@
 import { construct_simple_generic_procedure } from "generic-handler/GenericProcedure"
-import { SchemeType,  SchemeElement, is_self_evaluating, schemeSymbol, is_true, schemeNumber, schemeClosure } from "./definition/SchemeElement"
+import { SchemeType,  SchemeElement, is_self_evaluating, schemeSymbol, is_true, schemeNumber, schemeClosure, isSchemeList, schemeBoolean } from "./definition/SchemeElement"
 import { define_generic_matcher, define_logged_generic_matcher } from "./tools/ExpressionHandler"
 import { define, lookup, type DefaultEnvironment } from "./definition/Environment"
 import {P, match} from "pmatcher/MatchBuilder"
@@ -16,7 +16,7 @@ import { set } from "./definition/Environment"
 import { will_define } from "pmatcher/MatchDict/DictValue"
 
 // TODO: Support Currying
-type EvalHandler = (exec: (...args: any[]) => any, env: DefaultEnvironment, continuation: (result: SchemeElement, env: DefaultEnvironment) => SchemeElement) => any;
+export type EvalHandler = (exec: (...args: any[]) => any, env: DefaultEnvironment, continuation: (result: SchemeElement, env: DefaultEnvironment) => SchemeElement) => any;
 
 export const evaluate = construct_simple_generic_procedure("evaluate", 3, (expr, env, continuation) => {
     return default_eval(expr, env, continuation)
@@ -231,14 +231,73 @@ define_generic_matcher(evaluate, define_expr, ((exec, env, continuation): EvalHa
 
 
 
-// export const car_expr = ["car", [P.element, "pair"]]
+export const car_expr = ["car", [P.element, "pair"]]
 
-// define_generic_matcher(evaluate, car_expr, ((exec, env, continuation): EvalHandler => {
-//     return exec((pair: SchemeElement) => {
-        
-//     });
-// }) as EvalHandler)
+define_generic_matcher(evaluate, car_expr, ((exec, env, continuation): EvalHandler => {
+    return exec((pair: SchemeElement) => {
+       if (pair.value.length > 0){
+        const fst = first(evaluate(pair, env, continuation).value)
+        return evaluate(fst, env, continuation)
+       }
+       else{
+        throw Error("car: pair must have at least one element")
+       }
+    });
+}) as EvalHandler)
 
+export const cdr_expr = ["cdr", [P.element, "pair"]]    
+
+define_generic_matcher(evaluate, cdr_expr, ((exec, env, continuation): EvalHandler => {
+    return exec((pair: SchemeElement) => {
+       if (pair.value.length > 0){
+        return schemeList(rest(evaluate(pair, env, continuation).value))
+       }
+       else{
+        throw Error("cdr: pair must have at least one element")
+       }
+    });
+}) as EvalHandler)
+
+export const cons_expr = ["cons", [P.element, "a"], [P.element, "b"]]
+
+define_generic_matcher(evaluate, cons_expr, ((exec, env, continuation): EvalHandler => {
+    return exec((a: SchemeElement, b: SchemeElement) => {
+
+        if (isSchemeList(b)){
+            return schemeList([a, ...b.value])
+        }
+        else if (is_self_evaluating(b)){
+            // console.log(b)
+            return schemeList([a, b])
+        }
+        else{
+            throw Error("cons: second argument must be a list or a self-evaluating element")
+        }
+    });
+}) as EvalHandler)
+
+export const is_null_expr = ["null?", [P.element, "pair"]]
+
+define_generic_matcher(evaluate, is_null_expr, ((exec, env, continuation): EvalHandler => {
+    return exec((pair: SchemeElement) => {
+        const result = evaluate(pair, env, continuation)
+        if (isSchemeList(result)){
+            return schemeBoolean(is_empty(result.value))
+        }
+        else{
+            throw Error("null?: pair must be a list")
+        }
+    });
+}) as EvalHandler)
+
+
+export const list_expr = ["list", [P.segment, "elements"]]
+
+define_generic_matcher(evaluate, list_expr, ((exec, env, continuation): EvalHandler => {
+    return exec((elements: SchemeElement[]) => {
+        return schemeList(elements.map((element) => evaluate(element, env, continuation)))
+    });
+}) as EvalHandler)
 
 // const test_array = new SchemeElement([schemeNumber(1), new schemeList([schemeSymbol("lambda"), schemeNumber(2), schemeSymbol("3")])], SchemeType.List);
 // const test_result = match(test_array, [[P.element, "a"], ["lambda", [P.element, "b"], "3"]]);

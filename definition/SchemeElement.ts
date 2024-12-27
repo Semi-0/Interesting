@@ -144,6 +144,10 @@ export function schemeSymbol(value: string): SchemeElement{
     return new SchemeElement(value, SchemeType.symbol)
 }
 
+export function isSchemeList(value: SchemeElement): boolean{
+    return is_scheme_element(value) && value.is_type(SchemeType.list)
+}
+
 export function schemeList(value: SchemeElement[]): SchemeElement{
     return new SchemeElement(value, SchemeType.list)
 }

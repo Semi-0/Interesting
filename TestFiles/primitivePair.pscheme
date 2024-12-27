@@ -1,13 +1,7 @@
-(define cons
-   (lambda (a b)
-     (lambda (visitor)
-       (visitor a b))))
+(define get_length
+  (lambda (list)
+    (if (null? list)
+        0
+        (+ 1 (get_length (cdr list))))))
 
-(define car 
-  (lambda (pair)
-    (pair (lambda (a b) a))))
-
-(define cdr 
-  (lambda (pair)
-    (pair (lambda (a b) b))))
-
+(get_length '(1 2 3 4 5))

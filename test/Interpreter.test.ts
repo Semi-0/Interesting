@@ -1,6 +1,6 @@
 import { schemeList } from '../definition/SchemeElement';
 import { DefaultEnvironment } from '../definition/Environment';
-import { clear_env, interp, interp_file, main } from '../Main';
+import { clear_env, interp, evaluate_file, main } from '../Main';
 import { schemeSymbol, schemeBoolean, schemeNumber, SchemeElement, SchemeType } from '../definition/SchemeElement';
 
 describe('Interpreter Tests', () => {
@@ -190,7 +190,7 @@ describe('Interpreter Tests', () => {
   });
 
   test('evaluate fibonacci from file', async () => {
-    const result = await interp_file("./TestFiles/testFib.pscheme");
+    const result = await evaluate_file("./TestFiles/testFib.pscheme", new DefaultEnvironment());
     expect(result.get_type()).toEqual(SchemeType.number);
     expect(result.get_value()).toEqual(55);
   });
@@ -218,7 +218,7 @@ describe('Interpreter Tests', () => {
 
 
   test("car cons cdr", () => {
-    const expr = "(car (cons 1 2)))"
+    const expr = "(car (cons 1 2))"
     const result = main(expr);
     expect(result.get_type()).toEqual(SchemeType.number);
     expect(result.get_value()).toEqual(1);
@@ -227,18 +227,28 @@ describe('Interpreter Tests', () => {
   test("cdr cons", () => {
     const expr = "(cdr (cons 1 2))"
     const result = main(expr);
-    expect(result.get_type()).toEqual(SchemeType.number);
-    expect(result.get_value()).toEqual(2);
+    expect(result.get_type()).toEqual(SchemeType.list);
+    expect(result.get_value()).toEqual([schemeNumber(2)]);
   }) 
 
+  test("car cons cdr", () => {
+    const expr = "(car (cons 'a 'b))"
+    const result = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.symbol);
+    expect(result.get_value()).toEqual('a');
+  }) 
 
+  test("null? empty list", () => {
+    const expr = "(null? (cons 1 2))"
+    const result = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.boolean);
+    expect(result.get_value()).toEqual(false);
+  }) 
 
-
-
-  // TODO: cond 
-  // define apply
-  // tail recursion
-  // curring in 
-
-  // Additional tests for cond, begin, and set! can be added here
+  test("list", () => {
+    const expr = "(list 1 2 3)"
+    const result = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.list);
+    expect(result.get_value()).toEqual([schemeNumber(1), schemeNumber(2), schemeNumber(3)]);
+  }) 
 });
