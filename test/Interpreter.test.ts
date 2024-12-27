@@ -190,7 +190,7 @@ describe('Interpreter Tests', () => {
   });
 
   test('evaluate fibonacci from file', async () => {
-    const result = await evaluate_file("./TestFiles/testFib.pscheme", new DefaultEnvironment());
+    const result = await evaluate_file("./TestFiles/testFib.interesting", new DefaultEnvironment());
     expect(result.get_type()).toEqual(SchemeType.number);
     expect(result.get_value()).toEqual(55);
   });

@@ -65,7 +65,7 @@ export function clear_env(){
 var current_file_path = ""
 
 export async function evaluate_file(filePath: string, env: DefaultEnvironment): Promise<SchemeElement>{
-    const code = loadFileSync(filePath, {requiredExtension: ".pscheme"})
+    const code = loadFileSync(filePath, {requiredExtension: ".interesting"})
     current_file_path = filePath
     return interp(env)(code)
 }

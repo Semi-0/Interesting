@@ -75,9 +75,9 @@ interface FileValidationOptions {
 
 export function validateFile(filePath: string, options: FileValidationOptions = {}): boolean {
     const {
-        requiredExtension = '.pscheme',
+        requiredExtension = '.interesting',
         caseSensitive = false,
-        allowedExtensions = ['.pscheme']
+        allowedExtensions = ['.interesting']
     } = options;
 
     // Basic path validation

@@ -1,0 +1,2 @@
+(load "./primitivePair.interesting")
+(get_length '(1 2 3 4 5))
