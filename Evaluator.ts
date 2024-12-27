@@ -131,7 +131,6 @@ function seq_to_begin(seq: SchemeElement[]): SchemeElement{
         return first(seq)
     }
     else{
-
         return schemeList([schemeSymbol("begin"), ...seq])
     }
 }
