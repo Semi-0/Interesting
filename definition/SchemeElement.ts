@@ -170,26 +170,25 @@ export function construct_feedback(msg: string): SchemeElement{
 // adaptor for generic_array
 
 import { get_element , set_element , get_length , isArray  } from 'pmatcher/GenericArray';
-import { define_generic_procedure_handler as define_matcher_handler } from "pmatcher/node_modules/generic-handler/GenericProcedure"
-import { match_args as p_match_args } from "pmatcher/node_modules/generic-handler/Predicates"
 
 
-define_matcher_handler(get_element, 
-    p_match_args(isSchemeArray, (index: number) => true),
+
+define_generic_procedure_handler(get_element, 
+    match_args(isSchemeArray, (index: number) => true),
     (element: SchemeElement, index: number) => {
         return element.get_value()[index]
     }
 )
 
-define_matcher_handler(set_element,
-    p_match_args(isSchemeArray, (index: number) => true, (value: SchemeElement) => true),
+define_generic_procedure_handler(set_element,
+    match_args(isSchemeArray, (index: number) => true, (value: SchemeElement) => true),
     (element: SchemeElement, index: number, value: SchemeElement) => {
         return element.update_value(element.get_value().map((e: SchemeElement, i: number) => i === index ? value : e))
     }
 )
 
-define_matcher_handler(get_length,
-    p_match_args(isSchemeArray, (index: number) => true),
+define_generic_procedure_handler(get_length,
+    match_args(isSchemeArray, (index: number) => true),
     (element: SchemeElement) => {
         return element.get_value().length
     }
@@ -197,8 +196,8 @@ define_matcher_handler(get_length,
 
 
 
-define_matcher_handler(isArray,
-    p_match_args(isSchemeArray, (index: number) => true),
+define_generic_procedure_handler(isArray,
+    match_args(isSchemeArray, (index: number) => true),
     (element: SchemeElement) => {
         return true
     }
@@ -210,8 +209,8 @@ import { Closure } from './Closure';
 import type { DefaultEnvironment } from './Environment';
 
 
-define_matcher_handler(equal,
-    p_match_args(is_scheme_symbol , isString),
+define_generic_procedure_handler(equal,
+    match_args(is_scheme_symbol , isString),
     (a: SchemeElement , b: string) => {
         return a.get_value() === b
     }
