@@ -1,6 +1,6 @@
 import { schemeList } from '../definition/SchemeElement';
 import { DefaultEnvironment } from '../definition/Environment';
-import { clear_env, interp, evaluate_file, main } from '../Main';
+import { clear_env, interp,  main } from '../Main';
 import { schemeSymbol, schemeBoolean, schemeNumber, SchemeElement, SchemeType } from '../definition/SchemeElement';
 
 describe('Interpreter Tests', () => {

@@ -62,38 +62,38 @@ export function clear_env(){
 }
 
 
-var current_file_path = ""
+// var current_file_path = ""
 
-export async function evaluate_file(filePath: string, env: DefaultEnvironment): Promise<SchemeElement>{
-    const code = loadFileSync(filePath, {requiredExtension: ".interesting"})
-    current_file_path = filePath
-    return interp(env)(code)
-}
+// export async function evaluate_file(filePath: string, env: DefaultEnvironment): Promise<SchemeElement>{
+//     const code = loadFileSync(filePath, {requiredExtension: ".interesting"})
+//     current_file_path = filePath
+//     return interp(env)(code)
+// }
 
-const PROJECT_ROOT = path.resolve(__dirname, '..');
+// const PROJECT_ROOT = path.resolve(__dirname, '..');
 
-function resolveRelativePath(basePath: string, relativePath: string): string {
-    const path = require('path');
-    // If the path starts with '/', treat it as relative to project root
-    if (relativePath.startsWith('/')) {
-        return path.join(PROJECT_ROOT, relativePath.slice(1));
-    }
-    // Otherwise, resolve relative to the current file
-    const baseDir = path.dirname(basePath);
-    return path.resolve(baseDir, relativePath);
-}
+// function resolveRelativePath(basePath: string, relativePath: string): string {
+//     const path = require('path');
+//     // If the path starts with '/', treat it as relative to project root
+//     if (relativePath.startsWith('/')) {
+//         return path.join(PROJECT_ROOT, relativePath.slice(1));
+//     }
+//     // Otherwise, resolve relative to the current file
+//     const baseDir = path.dirname(basePath);
+//     return path.resolve(baseDir, relativePath);
+// }
 
-// i know this is not a good way, but this is the way to prevent circular dependency 
-// file path would depending on the file path of the current file
-// load only works in node.js
-export const load_expr = ["load", [P.element, "file_path"]]
+// // i know this is not a good way, but this is the way to prevent circular dependency 
+// // file path would depending on the file path of the current file
+// // load only works in node.js
+// export const load_expr = ["load", [P.element, "file_path"]]
 
-define_generic_matcher(evaluate, load_expr, ((exec, env, continuation): EvalHandler => {
-    return exec((file_path: SchemeElement) => {
-       const resolvedPath = resolveRelativePath(current_file_path, file_path.value);
-       return evaluate_file(resolvedPath, env)
-    });
-}) as EvalHandler)
+// define_generic_matcher(evaluate, load_expr, ((exec, env, continuation): EvalHandler => {
+//     return exec((file_path: SchemeElement) => {
+//        const resolvedPath = resolveRelativePath(current_file_path, file_path.value);
+//        return evaluate_file(resolvedPath, env)
+//     });
+// }) as EvalHandler)
 
 
 // Before parsing, let's clean up the input
