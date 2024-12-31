@@ -53,7 +53,7 @@ export function interp(env: DefaultEnvironment): (input: string) => SchemeElemen
     }
 }
 
-const env = new DefaultEnvironment()
+export var env = new DefaultEnvironment()
 export const main = interp(env)
 
 export function clear_env(){
