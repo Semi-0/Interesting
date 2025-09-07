@@ -11,6 +11,14 @@ describe('Interpreter Tests', () => {
     clear_env()
   });
 
+
+  test('evaluate string expression', () => {
+    const expr = "\"hello\""
+    const result: SchemeElement = main(expr);
+    expect(result.get_type()).toEqual(SchemeType.string);
+    expect(result.get_value()).toEqual("hello");
+  });
+
   test('evaluate if expression true branch', () => {
     const expr = "(if #t 1 2)"
     const result: SchemeElement = main(expr);

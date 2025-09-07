@@ -95,7 +95,7 @@ export function construct_scheme_element_from_value(value: any): SchemeElement{
 }
 
 export function is_self_evaluating(value: SchemeElement): boolean{
-    return  is_scheme_symbol(value) || is_scheme_number(value) || is_scheme_boolean(value)
+    return  is_scheme_symbol(value) || is_scheme_number(value) || is_scheme_boolean(value) || isSchemeStr(value)
 }
 
 export function isSchemeElement(value: any): value is SchemeElement{
